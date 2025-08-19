@@ -1,6 +1,7 @@
 import React from 'react'
 import Navbar from '../Components/navbar'
 import Features from '../Components/features'
+import HomeAbout from '../Components/homeAbout'
 
 export default function Home() {
   return (
@@ -15,6 +16,7 @@ export default function Home() {
       </div>
 
       <Features />
+      <HomeAbout />
     </div>
   )
 }

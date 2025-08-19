@@ -25,7 +25,7 @@ export default function Navbar() {
                 {item}
               </a>
             ))}
-            <Link to="/signup" className="bg-black text-white px-4 py-2 rounded-full hover:bg-orange-600 transition-colors">
+            <Link to="/signup" className="bg-black text-white px-4 py-2 rounded-full hover:bg-desert-clay transition-colors">
               Get Started
             </Link>
           </div>
