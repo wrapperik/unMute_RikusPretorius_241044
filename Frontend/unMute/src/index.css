@@ -3,6 +3,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@plugin "daisyui";
 
 
 input:-webkit-autofill,
@@ -18,6 +19,7 @@ input:-webkit-autofill:active {
   --color-milk: #F9F7F0;
   --color-light-stone: #D8D2C2;
   --color-desert-clay: #B17457;
+  --color-dark-clay: #80513cff;
   --color-graphite: #4A4947;
   --color-charcoal: #161616;
   --color-orange: #FF5B19;
@@ -62,7 +64,7 @@ body {
   background-color: #F9F7F0;
 }
 
-
+/* 
 button {
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
@@ -81,7 +83,7 @@ input:focus-visible {
   outline: none;
   box-shadow: none;
   border-color: #d1d5db; /* Tailwind gray-300 */
-}
+/* } */ 
 
 @media (prefers-color-scheme: light) {
   :root {

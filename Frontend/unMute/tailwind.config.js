@@ -13,6 +13,7 @@ export default {
         milk: '#F9F7F0',
         lightStone: '#D8D2C2',
         desertClay: '#B17457',
+        darkClay: '#80513cff',
         graphite: '#4A4947',
       },
     },

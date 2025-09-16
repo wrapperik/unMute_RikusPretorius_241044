@@ -8,56 +8,24 @@ export default function Navbar() {
   const navItems = ["Home", "About", "Services", "Blog", "Contact"];
 
   return (
-    <nav className="bg-milk fixed top-0 left-0 w-full z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          {/* Logo */}
-          <h1 className="text-2xl font-bold text-black">unMute</h1>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
-            {navItems.map((item) => (
-              <a
-                key={item}
-                href="#"
-                className="text-gray-700 hover:text-orange-500 transition-colors"
-              >
-                {item}
-              </a>
-            ))}
-            <Link to="/signup" className="bg-black text-white px-4 py-2 rounded-full hover:bg-desert-clay transition-colors">
-              Get Started
-            </Link>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex text-black items-center">
-            <button onClick={() => setIsOpen(!isOpen)}>
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Dropdown */}
-      {isOpen && (
-        <div className="md:hidden bg-white shadow-lg">
-          <div className="px-4 pt-4 pb-2 space-y-2">
-            {navItems.map((item) => (
-              <a
-                key={item}
-                href="#"
-                className="block text-gray-700 hover:text-indigo-600 transition-colors"
-              >
-                {item}
-              </a>
-            ))}
-            <Link to="/signup" className="w-full bg-desert-clay text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
-              Get Started
-            </Link>
-          </div>
-        </div>
-      )}
-    </nav>
+   <div className="navbar shadow-sm bg-milk sticky top-0 z-50">
+  <div className="flex-1">
+    <a className="btn btn-ghost text-xl">unMute</a>
+  </div>
+  <div className="flex-none">
+    <ul className="menu menu-horizontal px-1">
+      <li><a>Link</a></li>
+      <li>
+        <details>
+          <summary>Parent</summary>
+          <ul className="bg-base-100 rounded-t-none p-2">
+            <li><a>Link 1</a></li>
+            <li><a>Link 2</a></li>
+          </ul>
+        </details>
+      </li>
+    </ul>
+  </div>
+</div>
   );
 }
