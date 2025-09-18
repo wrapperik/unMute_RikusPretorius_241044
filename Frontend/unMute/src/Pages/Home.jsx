@@ -9,12 +9,11 @@ export default function Home() {
       <Navbar />
       {/* Header image section */}
       <div
-        className="w-full h-[100vh] bg-cover bg-centre flex p-55 items-start justify-center"
-        style={{ backgroundImage: "url('/public/header.png')" }}
+        className="w-full h-[100vh] bg-cover bg-center bg-no-repeat flex pt-30 md:pt-55 items-start justify-center"
+        style={{ backgroundImage: "url('/header.png')" }}
       >
-        <h2 className="text-5xl text-dark-clay p-4 rounded font-semibold ">Because silence isn't strength.</h2>
+        <h2 className="text-4xl md:text-5xl text-dark-clay font-semibold text-center">Because silence isn't strength.</h2>
       </div>
-
       <Features />
       <HomeAbout />
     </div>
