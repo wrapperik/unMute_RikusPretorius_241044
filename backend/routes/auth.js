@@ -1,42 +1,51 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import mysql from "mysql2/promise";
+import { pool } from "../db.js";
 
 const router = express.Router();
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
-});
+// Uses shared pool from db.js
 
 // REGISTER
 router.post("/register", async (req, res) => {
   const { email, username, password, is_admin } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ status: "error", error: "Email and password are required" });
+  }
   try {
+    // Check if user exists
+    const [existing] = await pool.query("SELECT id FROM users WHERE email = ?", [email]);
+    if (existing.length > 0) {
+      return res.status(409).json({ status: "error", error: "Email already registered" });
+    }
     const hashed = await bcrypt.hash(password, 10);
-    await pool.query(
+    const [result] = await pool.query(
       "INSERT INTO users (email, username, password, is_admin) VALUES (?, ?, ?, ?)",
       [email, username || null, hashed, is_admin || 0]
     );
-    res.json({ message: "User registered!" });
+    res.status(201).json({ status: "ok", message: "User registered", userId: result.insertId });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", error: err.message });
   }
 });
 
 // LOGIN
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { identifier, password } = req.body; // identifier can be email or username
+  if (!identifier || !password) {
+    return res.status(400).json({ status: "error", error: "Identifier and password required" });
+  }
+  const isEmail = identifier.includes("@");
+  const field = isEmail ? "email" : "username";
   try {
-    const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
-    if (rows.length === 0) return res.status(400).json({ error: "User not found" });
+    const [rows] = await pool.query(`SELECT * FROM users WHERE ${field} = ?`, [identifier]);
+    if (rows.length === 0) return res.status(400).json({ status: "error", error: "User not found" });
 
     const user = rows[0];
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ error: "Invalid credentials" });
+    if (!match) return res.status(400).json({ status: "error", error: "Invalid credentials" });
 
     const token = jwt.sign(
       { id: user.id, is_admin: user.is_admin },
@@ -45,13 +54,18 @@ router.post("/login", async (req, res) => {
     );
 
     res.json({
+      status: "ok",
       token,
-      email: user.email,
-      username: user.username,
-      is_admin: user.is_admin,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        is_admin: user.is_admin,
+      }
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ status: "error", error: err.message });
   }
 });
 

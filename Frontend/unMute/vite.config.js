@@ -8,8 +8,15 @@ export default defineConfig({
     react()
   ],
   server: {
+    // Proxy API calls during development so the frontend dev server forwards
+    // requests to the Express backend. We also rewrite the path so that
+    // fetch('/api/auth/register') becomes backend '/auth/register'.
     proxy: {
-      '/api': 'http://localhost:5000'
+      '/api': {
+        target: 'http://localhost:5050',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/api/, '')
+      }
     }
   }
 })

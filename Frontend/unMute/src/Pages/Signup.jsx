@@ -1,3 +1,4 @@
+// Using fetch with the Vite dev proxy: '/api' is rewritten to the backend server.
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -47,29 +48,37 @@ const Signup = () => {
         </button>
         <h2 className="text-2xl font-bold mb-6 text-black">Sign Up</h2>
         <form onSubmit={handleSubmit}>
+        
           <input
-            className="w-full mb-4 px-3 py-2 bg-white text-black border rounded autofill:bg-white autofill:text-black"
+            className="w-full mb-4 px-3 py-2 bg-white text-black border rounded focus:outline-none focus:ring-0 focus:border-gray-300 placeholder-gray-500"
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Email"
+            autoComplete="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+          />
+            <input
+            className="w-full mb-4 px-3 py-2 bg-white text-black border rounded focus:outline-none focus:ring-0 focus:border-gray-300 placeholder-gray-500"
             type="text"
+            id="username"
+            name="username"
             placeholder="Username"
-            autoComplete="off"
+            autoComplete="username"
+            autoCorrect="off"
+            autoCapitalize="none"
+            inputMode="text"
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
           />
           <input
-            className="w-full mb-4 px-3 py-2 bg-white text-black border rounded autofill:bg-white autofill:text-black"
-            type="email"
-            placeholder="Email"
-            autoComplete="off"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-          />
-          <input
-            className="w-full mb-6 px-3 py-2 bg-white text-black border rounded autofill:bg-white autofill:text-black"
+            className="w-full mb-6 px-3 py-2 bg-white text-black border rounded focus:outline-none focus:ring-0 focus:border-gray-300 placeholder-gray-500"
             type="password"
             placeholder="Password"
-            autoComplete="off"
+            autoComplete="new-password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required

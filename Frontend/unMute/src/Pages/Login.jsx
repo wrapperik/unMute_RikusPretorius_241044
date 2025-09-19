@@ -8,7 +8,7 @@ import { AuthContext } from "../context/AuthContext";
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // email or username
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,11 +21,19 @@ const Login = () => {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ identifier, password }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Login failed");
-      login(data); // Save user in context
+      if (!res.ok) throw new Error(data.error || data?.error?.message || "Login failed");
+      // Backend returns { status, token, user: { id, email, username, is_admin } }
+      const flattened = {
+        token: data.token,
+        id: data.user?.id,
+        email: data.user?.email,
+        username: data.user?.username,
+        is_admin: data.user?.is_admin === 1 || data.user?.is_admin === true, // normalize
+      };
+      login(flattened);
       navigate("/");
     } catch (err) {
       setError(err.message);
@@ -47,19 +55,21 @@ const Login = () => {
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Log In</h2>
         <form onSubmit={handleSubmit}>
           <input
-            className="w-full mb-4 px-3 py-2 border rounded"
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
+            className="w-full mb-4 px-3 py-2 border rounded text-black bg-white focus:outline-none focus:ring-0 focus:border-gray-300 placeholder-gray-500"
+            type="text"
+            placeholder="Email or Username"
+            value={identifier}
+            onChange={e => setIdentifier(e.target.value)}
+            autoComplete="username"
             required
           />
           <input
-            className="w-full mb-6 px-3 py-2 border rounded"
+            className="w-full mb-6 px-3 py-2 border rounded text-black bg-white focus:outline-none focus:ring-0 focus:border-gray-300 placeholder-gray-500"
             type="password"
             placeholder="Password"
             value={password}
             onChange={e => setPassword(e.target.value)}
+            autoComplete="current-password"
             required
           />
           {error && <div className="text-red-500 mb-2">{error}</div>}
