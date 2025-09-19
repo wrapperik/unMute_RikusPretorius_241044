@@ -12,7 +12,7 @@ export default function Features() {
     <><div>
       <h1 className="text-black mt-10 font-medium text-3xl text-center">What we offer</h1>
       </div>
-    <div className="p-6 mb-20 flex justify-center items-center flex-row flex-wrap gap-6">
+    <div className="p-6 mb-10 flex justify-center items-center flex-row flex-wrap gap-6">
       {features.map((feature, index) => (
   <div className="card w-96 bg-white/80 card-xl h-80 rounded-2xl shadow-sm cursor-pointer transform transition duration-100 ease-out hover:scale-[1.03] hover:shadow-md" key={index}>
           <figure className="px-6 pt-6 text-black">
