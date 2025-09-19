@@ -61,7 +61,7 @@ export default function Navbar() {
   );
 
   return (
-    <div className="navbar shadow-sm text-black bg-white/90 backdrop-blur-md supports-[backdrop-filter]:bg-white/90 sticky top-0 z-50 px-10 transition-colors">
+    <div className="navbar shadow-sm text-black bg-white sticky top-0 z-50 px-10 transition-colors">
       <div className="flex-1">
         <Link to="/" className="p-2 text-xl"><span className="font-bold">un</span><span>Mute</span></Link>
       </div>
