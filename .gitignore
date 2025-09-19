@@ -1,0 +1,35 @@
+# Node / build artifacts
+node_modules/
+*.log
+npm-debug.log*
+yarn-debug.log*
+.pnpm-store/
+
+# Dist outputs
+dist/
+build/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Environment files (never commit secrets)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*
+backend/.env
+Frontend/unMute/.env
+Frontend/unMute/.env.*
+!*.example
+!*.template
+
+# Lock files (optional to ignore if multi-pm, keep if you want deterministic)
+# pnpm-lock.yaml
+# yarn.lock
+
