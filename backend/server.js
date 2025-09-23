@@ -3,6 +3,7 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.js";
+import postsRoutes from "./routes/posts.js";
 import { testConnection } from "./db.js";
 
 
@@ -15,6 +16,8 @@ testConnection();
 
 // Support /auth route
 app.use("/auth", authRoutes);
+// Support /posts route
+app.use("/posts", postsRoutes);
 
 // Example route
 app.get("/", (req, res) => {

@@ -1,25 +1,106 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageHeader from '../Components/pageHeader'
 
-export default function Explore() {
-  // Array of posts
-  const posts = [
-    { id: 1, title: 'Understanding Anxiety', topic: 'Anxiety', time: '2h', description: 'Learn about the causes and ways to manage anxiety.' },
-    { id: 2, title: 'Coping with Depression', topic: 'Depression', time: '3h', description: 'Explore strategies to cope with depression effectively.' },
-    { id: 3, title: 'The Science of Happiness', topic: 'Happiness', time: '1h', description: 'Discover the science behind happiness and how to achieve it.' },
-    { id: 4, title: 'Managing Stress', topic: 'Stress', time: '4h', description: 'Tips and techniques to manage stress in daily life.' },
-    { id: 5, title: 'Overcoming Anxiety', topic: 'Anxiety', time: '2h', description: 'Practical steps to overcome anxiety and regain control.' },
-     { id: 6, title: 'The Science of Happiness', topic: 'Happiness', time: '1h', description: 'Discover the science behind happiness and how to achieve it.' },
-    { id: 7, title: 'Managing Stress', topic: 'Stress', time: '4h', description: 'Tips and techniques to manage stress in daily life.' },
-    { id: 8, title: 'Overcoming Anxiety', topic: 'Anxiety', time: '2h', description: 'Practical steps to overcome anxiety and regain control.' },
-  ];
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5050';
 
+function formatTimeSince(date) {
+  if (!date) return '';
+  const sec = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (sec < 60) return `${sec}s`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h`;
+  const days = Math.floor(hr / 24);
+  if (days < 7) return `${days}d`;
+  const weeks = Math.floor(days / 7);
+  return `${weeks}w`;
+}
+
+export default function Explore() {
+  // State for posts + UI state
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   // State for selected topic filter
   const [selectedTopic, setSelectedTopic] = useState('All');
 
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    setError(null);
+
+    fetch(`${API_BASE}/posts/public`)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(json => {
+        if (!mounted) return;
+        if (json.status !== 'ok') {
+          setError(json.error || 'Unexpected API response');
+          return;
+        }
+
+        // Map DB rows into the UI shape expected by the page using title/topic/created_at from DB
+        const mapped = (json.data || []).map(r => {
+          const content = r.content || '';
+          const rawTopic = (r.topic || '').toString();
+          const topic = (rawTopic && rawTopic !== 'NULL')
+            ? rawTopic.trim().replace(/\s+/g, ' ')
+            : 'Other';
+          const createdAt = r.created_at ? new Date(r.created_at) : null;
+
+          return {
+            id: r.post_id,
+            title: (r.title && r.title.trim()) || (content.split('\n')[0] || `Post ${r.post_id}`).slice(0, 255),
+            topic,
+            time: formatTimeSince(createdAt),
+            description: content,
+            raw: r,
+          };
+        });
+
+        setPosts(mapped);
+      })
+      .catch(err => {
+        console.error('Failed to load posts:', err);
+        if (mounted) setError(err.message);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => { mounted = false; };
+  }, []);
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8">
+          <p>Loading posts…</p>
+        </main>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <PageHeader />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8">
+          <p className="text-red-600">Error loading posts: {error}</p>
+        </main>
+      </>
+    );
+  }
+
   // Get unique topics and their post counts
   const topics = posts.reduce((acc, post) => {
-    acc[post.topic] = (acc[post.topic] || 0) + 1;
+    const raw = (post.topic || 'Other').toString();
+    const t = raw.trim().replace(/\s+/g, ' ');
+    acc[t] = (acc[t] || 0) + 1;
     return acc;
   }, {});
 
@@ -28,7 +109,7 @@ export default function Explore() {
 
   return (
     <>
-    <PageHeader />
+      <PageHeader />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-col lg:flex-row gap-12">
         {/* Filtering System */}
         <aside className="text-black w-full lg:w-1/3 lg:sticky top-28 self-start" aria-label="Filter posts by topic">

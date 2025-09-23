@@ -8,7 +8,7 @@ export default function HomeAbout() {
   return (
     <><div>
       <h1 className="text-black mb-10 font-medium text-3xl text-center">What we're about</h1>
-    </div><div className="flex flex-col md:flex-row justify-center items-center m-auto mb-20 mx-10 max-w-8xl gap-15 bg-white/60 p-20 rounded-2xl shadow-sm">
+    </div><div className="flex flex-col md:flex-row justify-center items-center m-auto mb-20 mx-10 max-w-8xl gap-15 bg-white/60 p-20 rounded-3xl shadow-sm">
         {/* Text Section */}
         <div className="flex-1 text-center md:text-left">
           <h1 className="text-3xl text-black font-bold mb-4">Giving men a voice</h1>
