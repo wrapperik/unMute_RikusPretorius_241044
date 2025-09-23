@@ -4,6 +4,7 @@ import Signup from './Pages/Signup.jsx'
 import Login from './Pages/Login.jsx'
 import Explore from './Pages/Explore.jsx'
 import AddPostPage from './Pages/addPost.jsx'
+import ViewPostPage from './Pages/viewPost.jsx';
 import Navbar from './Components/navbar.jsx'
 import './index.css';
 
@@ -12,11 +13,12 @@ function App() {
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-  <Route path="/explore" element={<Explore />} />
-  <Route path="/addpost" element={<AddPostPage />} />
+    <Route path="/" element={<Home />} />
+    <Route path="/signup" element={<Signup />} />
+    <Route path="/login" element={<Login />} />
+    <Route path="/explore" element={<Explore />} />
+    <Route path="/addpost" element={<AddPostPage />} />
+    <Route path="/viewpost/:id" element={<ViewPostPage />} />
       </Routes>
     </Router>
   )

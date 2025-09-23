@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import PageHeader from '../Components/explorePageHeader.jsx'
+import { Heart } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
+import { Flag } from 'lucide-react'
+
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5050';
 
@@ -54,6 +60,7 @@ export default function Explore() {
           return {
             id: r.post_id,
             title: (r.title && r.title.trim()) || (content.split('\n')[0] || `Post ${r.post_id}`).slice(0, 255),
+            username: r.username || null,
             topic,
             time: formatTimeSince(createdAt),
             description: content,
@@ -107,6 +114,77 @@ export default function Explore() {
   // Filter posts based on selected topic
   const filteredPosts = selectedTopic === 'All' ? posts : posts.filter(post => post.topic === selectedTopic);
 
+  // PostCard component to handle individual post hover state
+  const PostCard = ({ post }) => {
+    const [showReactions, setShowReactions] = useState(false);
+    const [timeoutId, setTimeoutId] = useState(null);
+    const navigate = useNavigate();
+
+    const handleMouseEnter = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      setShowReactions(true);
+    };
+
+    const handleMouseLeave = () => {
+      const id = setTimeout(() => setShowReactions(false), 400);
+      setTimeoutId(id);
+    };
+
+    useEffect(() => {
+      return () => {
+        if (timeoutId) clearTimeout(timeoutId);
+      };
+    }, [timeoutId]);
+
+    const handleClick = () => {
+  navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title } });
+    };
+
+    return (
+      <div className="relative container" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+        <div className="card-body card bg-white card-md rounded-3xl text-black shadow-sm m-2 h-auto cursor-pointer" onClick={handleClick}>
+          <div className="flex">
+            <h2 className="card-title flex-start">
+              {post.title}
+              {post.username && (
+                <span className="ml-3 text-sm text-black/50">by {post.username}</span>
+              )}
+            </h2>
+            <div className="flex-end ml-auto flex items-center gap-2">
+              <p>{post.time}</p>
+              <h4 className="card-title text-sm px-2 rounded-full bg-[#DED5E6]">{post.topic}</h4>
+            </div>
+          </div>
+          <div className="h-0.5 w-full rounded bg-black/10"></div>
+          <p>{post.description}</p>
+        </div>
+        {/* Animated Reactions - show based on state */}
+        <AnimatePresence>
+          {showReactions && (
+            <motion.div
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 30, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="absolute left-0 right-4 -bottom-3 flex justify-end gap-2 px-2 mt-10"
+              style={{ pointerEvents: 'none' }}
+            >
+              <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer" style={{ pointerEvents: 'auto' }}>
+                <Flag size={16} />
+              </div>
+              <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer" style={{ pointerEvents: 'auto' }}>
+                <MessageCircle size={16} />
+              </div>
+              <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center flex border border-0.5 border-gray-200 transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer" style={{ pointerEvents: 'auto' }}>
+                <Heart size={16} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  };
+
   return (
     <>
       <PageHeader />
@@ -150,21 +228,19 @@ export default function Explore() {
 
         {/* Cards Section */}
         <section className="flex flex-col gap-8 w-full lg:w-2/3 " aria-live="polite" aria-label="Posts list">
-          {filteredPosts.map(post => (
-            <div key={post.id} className="card bg-white card-md rounded-3xl text-black shadow-sm m-2 h-auto transform transition duration-100 ease-out hover:scale-[1.03] hover:shadow-md cursor-pointer">
-              <div className="card-body">
-                <div className="flex">
-                  <h2 className="card-title flex-start">{post.title}</h2>
-                  <div className="flex-end ml-auto flex items-center gap-2">
-                    <p>{post.time}</p>
-                    <h4 className="card-title text-sm px-2 rounded-full bg-[#DED5E6]">{post.topic}</h4>
-                  </div>
-                </div>
-                <div className="h-0.5 w-full rounded bg-black/10"></div>
-                <p>{post.description}</p>
-              </div>
-            </div>
-          ))}
+          <AnimatePresence>
+            {filteredPosts.map((post, idx) => (
+              <motion.div
+                key={post.id}
+                initial={{ x: 100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -100, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 60, damping: 18, delay: idx * 0.08 }}
+              >
+                <PostCard post={post} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </section>
       </main>
     </>

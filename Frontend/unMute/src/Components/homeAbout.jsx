@@ -30,7 +30,7 @@ export default function HomeAbout() {
         {/* Image Section */}
         <div className="flex-end">
           <img
-            src="/public/about.png"
+            src="/about.png"
             alt="Community illustration"
             className="w-100 h-auto" />
         </div>
