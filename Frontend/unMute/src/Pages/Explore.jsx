@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import PageHeader from '../Components/pageHeader'
+import PageHeader from '../Components/explorePageHeader.jsx'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5050';
 
