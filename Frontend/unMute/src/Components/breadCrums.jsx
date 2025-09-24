@@ -17,7 +17,7 @@ export default function BreadCrumbs() {
     const segments = pathname.split('/').filter(Boolean);
     const fromPath = state && state.from;
 
-    // If previous page is available, always show it as first crumb
+    // Previous page
     if (fromPath) {
         const fromSeg = fromPath.split('/').filter(Boolean).pop() || '';
         const fromLabel = LABELS[fromSeg] || (fromSeg.charAt(0).toUpperCase() + fromSeg.slice(1)) || 'Previous';
@@ -26,18 +26,15 @@ export default function BreadCrumbs() {
         crumbs.push({ label: LABELS[''] || 'Home', to: '/' });
     }
 
-    // For viewpost, use postTitle if available
+    // Current page
+    let currentLabel;
     if (segments[0] === 'viewpost' && state && state.postTitle) {
-        crumbs.push({ label: state.postTitle, to: pathname, isLast: true });
+        currentLabel = state.postTitle;
     } else {
-        let cumulative = '';
-        segments.forEach((seg, idx) => {
-            cumulative += `/${seg}`;
-            let label = LABELS[seg] || seg.charAt(0).toUpperCase() + seg.slice(1);
-            let isLast = idx === segments.length - 1;
-            crumbs.push({ label, to: cumulative, isLast });
-        });
+        const lastSeg = segments[segments.length - 1] || '';
+        currentLabel = LABELS[lastSeg] || (lastSeg.charAt(0).toUpperCase() + lastSeg.slice(1)) || 'Current';
     }
+    crumbs.push({ label: currentLabel, to: pathname, isLast: true });
 
     return (
         <nav className="breadcrumbs text-sm mb-5" aria-label="Breadcrumb">

@@ -137,7 +137,7 @@ export default function Explore() {
     }, [timeoutId]);
 
     const handleClick = () => {
-  navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title } });
+  navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title, from: '/explore' } });
     };
 
     return (
@@ -146,9 +146,9 @@ export default function Explore() {
           <div className="flex">
             <h2 className="card-title flex-start">
               {post.title}
-              {post.username && (
-                <span className="ml-3 text-sm text-black/50">by {post.username}</span>
-              )}
+              <span className="ml-3 text-sm text-black/50">
+                by {post.raw && post.raw.is_anonymous ? 'Anonymous' : (post.username || '')}
+              </span>
             </h2>
             <div className="flex-end ml-auto flex items-center gap-2">
               <p>{post.time}</p>

@@ -72,4 +72,25 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+
+// POST /posts - create a new post
+router.post('/', async (req, res) => {
+  try {
+    const { title, topic, content, is_anonymous } = req.body;
+    // TODO: Replace with actual user_id from auth/session
+    const user_id = 1;
+    if (!title || !topic || !content) {
+      return res.status(400).json({ status: 'error', error: 'Missing required fields' });
+    }
+    const [result] = await pool.query(
+      `INSERT INTO PublicPosts (user_id, title, topic, content, is_anonymous) VALUES (?, ?, ?, ?, ?)`,
+      [user_id, title, topic, content, is_anonymous ? 1 : 0]
+    );
+    res.json({ status: 'ok', post_id: result.insertId });
+  } catch (err) {
+    console.error('POST /posts error:', err);
+    res.status(500).json({ status: 'error', error: err.message });
+  }
+});
+
 export default router;
