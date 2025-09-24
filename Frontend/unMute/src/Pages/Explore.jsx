@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageHeader from '../Components/explorePageHeader.jsx'
 import { Heart } from 'lucide-react'
 import { MessageCircle } from 'lucide-react'
 import { Flag } from 'lucide-react'
+import { AuthContext } from '../context/AuthContext.jsx'
 
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5050';
@@ -57,14 +58,15 @@ export default function Explore() {
             : 'Other';
           const createdAt = r.created_at ? new Date(r.created_at) : null;
 
-          return {
-            id: r.post_id,
+      return {
+        id: r.post_id,
             title: (r.title && r.title.trim()) || (content.split('\n')[0] || `Post ${r.post_id}`).slice(0, 255),
             username: r.username || null,
             topic,
             time: formatTimeSince(createdAt),
             description: content,
             raw: r,
+            likes: { count: 0, liked_by_user: false },
           };
         });
 
@@ -103,6 +105,16 @@ export default function Explore() {
     );
   }
 
+  // Topic color mapping
+  const topicColors = {
+    Joy: 'bg-white border-1 border-base-500',
+    Stress: 'bg-white border-1  border-base-500',
+    Anxiety: 'bg-white border-1 border-base-500',
+    Depression: 'bg-white border-1 border-base-500',
+    Motivation: 'bg-white border-1 border-base-500',
+    Other: 'bg-white border-1  border-base-500',
+  };
+
   // Get unique topics and their post counts
   const topics = posts.reduce((acc, post) => {
     const raw = (post.topic || 'Other').toString();
@@ -116,8 +128,10 @@ export default function Explore() {
 
   // PostCard component to handle individual post hover state
   const PostCard = ({ post }) => {
+    const { user } = useContext(AuthContext);
     const [showReactions, setShowReactions] = useState(false);
     const [timeoutId, setTimeoutId] = useState(null);
+    const [likes, setLikes] = useState(post.likes || { count: 0, liked_by_user: false });
     const navigate = useNavigate();
 
     const handleMouseEnter = () => {
@@ -136,6 +150,23 @@ export default function Explore() {
       };
     }, [timeoutId]);
 
+    // Load likes for this post when component mounts
+    useEffect(() => {
+      let mounted = true;
+      fetch(`${API_BASE}/posts/${post.id}/likes`, {
+        headers: user && user.token ? { Authorization: `Bearer ${user.token}` } : {}
+      })
+        .then(res => res.json())
+        .then(json => {
+          if (!mounted) return;
+          if (json.status === 'ok' && json.data) {
+            setLikes(json.data);
+          }
+        })
+        .catch(() => {})
+      return () => { mounted = false; };
+    }, [post.id, user]);
+
     const handleClick = () => {
   navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title, from: '/explore' } });
     };
@@ -152,17 +183,12 @@ export default function Explore() {
             </h2>
             <div className="flex-end ml-auto flex items-center gap-2">
               <p>{post.time}</p>
-              <h4 className="card-title text-sm px-2 rounded-full bg-[#DED5E6]">{post.topic}</h4>
+              <h4 className={`card-title text-sm px-2 rounded-full ${topicColors[post.topic] || topicColors.Other}`}>{post.topic}</h4>
             </div>
           </div>
           <div className="h-0.5 w-full rounded bg-black/10"></div>
-          <p>
-            {post.description.split('\n').map((line, idx) => (
-              <React.Fragment key={idx}>
-                {line}
-                <br />
-              </React.Fragment>
-            ))}
+          <p className="text-sm text-gray-800 line-clamp-4" style={{ display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            {post.description}
           </p>
         </div>
         {/* Animated Reactions - show based on state */}
@@ -180,10 +206,49 @@ export default function Explore() {
                 <Flag size={16} />
               </div>
               <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer" style={{ pointerEvents: 'auto' }}>
-                <MessageCircle size={16} />
+                <div onClick={e => { e.stopPropagation(); navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title, from: '/explore', scrollToComments: true } }); }} aria-label="View comments">
+                  <MessageCircle size={16} />
+                </div>
               </div>
               <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center flex border border-0.5 border-gray-200 transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer" style={{ pointerEvents: 'auto' }}>
-                <Heart size={16} />
+                <motion.button
+                  aria-label={likes.liked_by_user ? 'Unlike' : 'Like'}
+                  onClick={e => { e.stopPropagation();
+                    // require login
+                    if (!user || !user.token) {
+                      // redirect to login
+                      navigate('/login');
+                      return;
+                    }
+                    // optimistic UI
+                    const prev = { ...likes };
+                    const newLiked = !likes.liked_by_user;
+                    setLikes({ count: newLiked ? likes.count + 1 : Math.max(0, likes.count - 1), liked_by_user: newLiked });
+                    console.log('Calling POST /posts/' + post.id + '/like with token present');
+                    fetch(`${API_BASE}/posts/${post.id}/like`, {
+                      method: 'POST',
+                      headers: { 'Authorization': `Bearer ${user.token}` }
+                    })
+                      .then(async res => {
+                        const body = await res.text();
+                        let json;
+                        try { json = JSON.parse(body); } catch(e) { json = body; }
+                        console.log('Response:', res.status, json);
+                        if (!json || json.status !== 'ok') {
+                          console.warn('Like API returned error, rolling back');
+                          setLikes(prev); // rollback on error
+                        }
+                      })
+                      .catch(err => { console.error('Network error liking post:', err); setLikes(prev); });
+                  }}
+                  className="flex items-center justify-center"
+                  initial={false}
+                  animate={likes.liked_by_user ? { scale: 1.15 } : { scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                  whileTap={{ scale: 1.6 }}
+                >
+                  <Heart size={16} className={likes.liked_by_user ? 'liked-heart' : ''} />
+                </motion.button>
               </div>
             </motion.div>
           )}
@@ -211,7 +276,7 @@ export default function Explore() {
                   className="flex w-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md"
                 >
                   <h2 className="flex-start">All</h2>
-                  <h2 className="ml-auto bg-[#E2EEDA] px-3 py-0.5 rounded-full">{posts.length}</h2>
+                  <h2 className="ml-auto bg-white px-3 py-0.5 rounded-full">{posts.length}</h2>
                 </div>
               </li>
               {Object.entries(topics).map(([topic, count]) => (
@@ -224,8 +289,8 @@ export default function Explore() {
                     onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setSelectedTopic(topic)}
                     className="flex w-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md"
                   >
-                    <h2 className="flex-start">{topic}</h2>
-                    <h2 className="ml-auto bg-[#E2EEDA] px-3 py-0.5 rounded-full">{count}</h2>
+                    <h2 className={`flex-start px-3 py-0.5 rounded-full ${topicColors[topic] || topicColors.Other}`}>{topic}</h2>
+                    <h2 className="ml-auto bg-white px-3 py-0.5 rounded-full">{count}</h2>
                   </div>
                 </li>
               ))}

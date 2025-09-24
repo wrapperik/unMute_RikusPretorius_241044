@@ -47,8 +47,10 @@ router.post("/login", async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ status: "error", error: "Invalid credentials" });
 
+    // Normalize user id 
+    const uid = user.id || user.user_id || user.userId;
     const token = jwt.sign(
-      { id: user.id, is_admin: user.is_admin },
+      { id: uid, is_admin: user.is_admin },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -57,7 +59,7 @@ router.post("/login", async (req, res) => {
       status: "ok",
       token,
       user: {
-        id: user.id,
+        id: uid,
         email: user.email,
         username: user.username,
         is_admin: user.is_admin,

@@ -130,7 +130,10 @@ export default function Navbar() {
   return (
     <div className="navbar relative shadow-sm text-black bg-white sticky top-0 z-50 md:px-10 transition-colors">
       <div className="flex-1">
-        <Link to="/" className="p-2 text-xl"><span className="font-bold">un</span><span>Mute</span></Link>
+        <Link to="/" className="p-2 text-xl inline-flex items-center" aria-label="unMute home">
+          {/* use public folder image; keep height similar to surrounding text */}
+          <img src="/unmute-logo.png" alt="unMute" className="h-6 w-auto" />
+        </Link>
       </div>
 
       {/* Mobile hamburger button */}
