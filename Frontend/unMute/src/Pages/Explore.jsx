@@ -156,7 +156,14 @@ export default function Explore() {
             </div>
           </div>
           <div className="h-0.5 w-full rounded bg-black/10"></div>
-          <p>{post.description}</p>
+          <p>
+            {post.description.split('\n').map((line, idx) => (
+              <React.Fragment key={idx}>
+                {line}
+                <br />
+              </React.Fragment>
+            ))}
+          </p>
         </div>
         {/* Animated Reactions - show based on state */}
         <AnimatePresence>

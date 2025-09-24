@@ -67,7 +67,14 @@ export default function ViewPostPage() {
                             </div>
                         </div>
                         <div className="h-0.5 w-full rounded bg-black/10 mb-4"></div>
-                        <div className="text-lg text-black">{post.content}</div>
+                                                <div className="text-lg text-black">
+                                                    {post.content.split('\n').map((line, idx) => (
+                                                        <React.Fragment key={idx}>
+                                                            {line}
+                                                            <br />
+                                                        </React.Fragment>
+                                                    ))}
+                                                </div>
                     </>
                 )}
 
