@@ -1,3 +1,6 @@
+// Posts feature routes: handles public feed, view post, create post,
+// likes, and comments. Some actions require a logged-in user.
+
 import express from "express";
 import jwt from "jsonwebtoken";
 import { pool } from "../db.js";
@@ -5,6 +8,7 @@ import { pool } from "../db.js";
 const router = express.Router();
 
 // Helper: extract user id from Authorization: Bearer <token>
+// Returns null if header is missing or token is invalid.
 function getUserIdFromReq(req) {
   const auth = req.headers.authorization || req.headers.Authorization;
   if (!auth) return null;
@@ -26,6 +30,7 @@ function getUserIdFromReq(req) {
 }
 
 // GET /posts/public - return recent public posts
+// No auth needed. Joins with Users for username (if not anonymous).
 router.get("/public", async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -96,6 +101,8 @@ router.get('/:id', async (req, res) => {
 
 
 // POST /posts - create a new post
+// NOTE: This is currently using a placeholder user_id = 1.
+// In a real app, you would read the user id from the JWT token.
 router.post('/', async (req, res) => {
   try {
     const { title, topic, content, is_anonymous } = req.body;
@@ -117,6 +124,8 @@ router.post('/', async (req, res) => {
 
 
 // POST /posts/:id/like - toggle like for the authenticated user
+// Requires a valid Bearer token. First tries to insert a like; if it
+// already exists (duplicate), deletes it to "unlike".
 router.post('/:id/like', async (req, res) => {
   try {
     const postId = req.params.id;
@@ -156,7 +165,8 @@ router.post('/:id/like', async (req, res) => {
 });
 
 
-// GET /posts/:id/likes - return count and whether current user liked it
+// GET /posts/:id/likes - return like count and whether current user liked it
+// If a token is provided, checks if that user has liked the post.
 router.get('/:id/likes', async (req, res) => {
   try {
     const postId = req.params.id;
@@ -220,6 +230,7 @@ function getPayloadFromReq(req) {
 }
 
 // GET /posts/:id/comments - list comments for a post
+// Public endpoint. Shows all comments in chronological order.
 router.get('/:id/comments', async (req, res) => {
   try {
     const postId = req.params.id;
@@ -243,6 +254,7 @@ router.get('/:id/comments', async (req, res) => {
 });
 
 // POST /posts/:id/comments - create a new comment
+// Auth optional: if no token provided, user_id is stored as NULL (anonymous).
 router.post('/:id/comments', async (req, res) => {
   try {
     const postId = req.params.id;
@@ -268,6 +280,7 @@ router.post('/:id/comments', async (req, res) => {
 });
 
 // DELETE /posts/:postId/comments/:commentId - delete a comment (owner or admin)
+// Requires auth. Only the comment's author or an admin can delete.
 router.delete('/:postId/comments/:commentId', async (req, res) => {
   try {
     const { postId, commentId } = req.params;
@@ -294,6 +307,7 @@ router.delete('/:postId/comments/:commentId', async (req, res) => {
 });
 
 // POST /posts/:postId/comments/:commentId/flag - flag a comment for moderation
+// Requires auth. Sets is_flagged = 1 and records flagged_at timestamp.
 router.post('/:postId/comments/:commentId/flag', async (req, res) => {
   try {
     const { postId, commentId } = req.params;
@@ -313,5 +327,5 @@ router.post('/:postId/comments/:commentId/flag', async (req, res) => {
   }
 });
 
-export default router;
+export default router; // mounted under /posts in server.js
 

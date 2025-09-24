@@ -1,10 +1,13 @@
+// Resources feature routes: simple CRUD for educational links/content.
+// Public can list resources; only admins can create or delete.
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { pool } from '../db.js';
 
 const router = express.Router();
 
-// Helper: parse token payload
+// Helper: parse token payload from Authorization header.
+// Returns decoded payload or null if missing/invalid.
 function getPayloadFromReq(req) {
   const auth = req.headers.authorization || req.headers.Authorization;
   if (!auth) return null;
@@ -18,6 +21,7 @@ function getPayloadFromReq(req) {
 }
 
 // GET /resources - list latest resources
+// Public endpoint. Returns at most 200 most recent resources.
 router.get('/', async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -31,6 +35,8 @@ router.get('/', async (req, res) => {
 });
 
 // POST /resources - create a resource (admin only)
+// Expects: { title (required), url (optional), description (required) }
+// Only allowed if JWT payload has is_admin = true/1.
 router.post('/', async (req, res) => {
   try {
     const payload = getPayloadFromReq(req);
@@ -59,6 +65,7 @@ router.post('/', async (req, res) => {
 });
 
 // DELETE /resources/:id - hard delete (admin only)
+// Permanently removes a resource. Admins only.
 router.delete('/:id', async (req, res) => {
   try {
     const payload = getPayloadFromReq(req);
@@ -77,4 +84,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-export default router;
+export default router; // mounted under /resources in server.js

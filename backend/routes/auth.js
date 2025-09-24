@@ -1,3 +1,7 @@
+// Authentication routes: register new users and login existing users.
+// Uses bcrypt for hashing passwords and JWT for issuing tokens.
+// The token includes the user's id and is_admin flag.
+
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -7,7 +11,11 @@ const router = express.Router();
 
 // Uses shared pool from db.js
 
-// REGISTER
+// REGISTER a new account
+// Expects: { email, username?, password, is_admin? }
+// - Hashes the password
+// - Inserts a new row in Users table
+// - Returns 201 on success
 router.post("/register", async (req, res) => {
   const { email, username, password, is_admin } = req.body;
   if (!email || !password) {
@@ -31,7 +39,11 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// LOGIN
+// LOGIN with email or username
+// Expects: { identifier, password }
+// - Looks up by email if identifier contains '@', otherwise username
+// - Verifies password with bcrypt
+// - Issues a JWT token: { id, is_admin }
 router.post("/login", async (req, res) => {
   const { identifier, password } = req.body; // identifier can be email or username
   if (!identifier || !password) {
@@ -72,4 +84,4 @@ router.post("/login", async (req, res) => {
 });
 
 
-export default router;
+export default router; // mounted under /auth in server.js
