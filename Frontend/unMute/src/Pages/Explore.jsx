@@ -173,7 +173,7 @@ export default function Explore() {
 
     return (
       <div className="relative container" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-        <div className="card-body card bg-white card-md rounded-3xl text-black shadow-sm m-2 h-auto cursor-pointer" onClick={handleClick}>
+        <div className="card-body card bg-secondary/25 card-md rounded-3xl text-black shadow-sm m-2 h-auto cursor-pointer" onClick={handleClick}>
           <div className="flex">
             <h2 className="card-title flex-start">
               {post.title}
