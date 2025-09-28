@@ -327,5 +327,30 @@ router.post('/:postId/comments/:commentId/flag', async (req, res) => {
   }
 });
 
+router.delete('/:id', async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const payload = getPayloadFromReq(req);
+    const userId = payload && (payload.id || payload.user_id || payload.userId) ? (payload.id || payload.user_id || payload.userId) : null;
+    const isAdmin = payload && (payload.is_admin === 1 || payload.is_admin === true);
+
+    if (!userId && !isAdmin) return res.status(401).json({ status: 'error', error: 'Unauthorized' });
+
+    // Fetch the post
+    const [rows] = await pool.query('SELECT post_id, user_id FROM PublicPosts WHERE post_id = ? LIMIT 1', [postId]);
+    if (rows.length === 0) return res.status(404).json({ status: 'error', error: 'Post not found' });
+
+    const post = rows[0];
+    if (!isAdmin && post.user_id !== Number(userId)) {
+      return res.status(403).json({ status: 'error', error: 'Forbidden' });
+    }
+
+    await pool.query('DELETE FROM PublicPosts WHERE post_id = ?', [postId]);
+    res.json({ status: 'ok', message: 'Post deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ status: 'error', error: err.message });
+  }
+});
+
 export default router; // mounted under /posts in server.js
 

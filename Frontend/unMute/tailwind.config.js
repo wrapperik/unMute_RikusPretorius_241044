@@ -10,11 +10,12 @@ export default {
         sans: ['Raleway', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
-        milk: '#F9F7F0',
-        lightStone: '#D8D2C2',
-        desertClay: '#B17457',
-        darkClay: '#80513cff',
-        graphite: '#4A4947',
+  'text': '#130e0d',
+  'background': '#faf8f7',
+  'primary': '#997968',
+  'secondary': '#c8c6ad',
+  'accent': '#b0b491',
+
       },
     },
   },
