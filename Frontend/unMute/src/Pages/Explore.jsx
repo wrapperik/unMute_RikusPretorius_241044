@@ -2,9 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageHeader from '../Components/explorePageHeader.jsx'
-import { Heart } from 'lucide-react'
-import { MessageCircle } from 'lucide-react'
-import { Flag } from 'lucide-react'
+import { Heart, MessageCircle, Flag, Trash2 } from 'lucide-react'
 import { AuthContext } from '../context/AuthContext.jsx'
 
 
@@ -31,6 +29,9 @@ export default function Explore() {
   const [error, setError] = useState(null);
   // State for selected topic filter
   const [selectedTopic, setSelectedTopic] = useState('All');
+  const handleDeletePost = (postId) => {
+    setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -127,12 +128,33 @@ export default function Explore() {
   const filteredPosts = selectedTopic === 'All' ? posts : posts.filter(post => post.topic === selectedTopic);
 
   // PostCard component to handle individual post hover state
-  const PostCard = ({ post }) => {
+  const PostCard = ({ post, onDelete }) => {
     const { user } = useContext(AuthContext);
     const [showReactions, setShowReactions] = useState(false);
     const [timeoutId, setTimeoutId] = useState(null);
     const [likes, setLikes] = useState(post.likes || { count: 0, liked_by_user: false });
     const navigate = useNavigate();
+    const canDelete = user && (user.id === post.raw.user_id || user.is_admin);
+    const handleDelete = async (e) => {
+      e.stopPropagation();
+      if(!window.confirm('Are you sure you want to permanently delete this post? This action cannot be undone.')) return;
+      try {
+        const res = await fetch (`${API_BASE}/posts/${post.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization':`Bearer ${user.token}`
+          }
+        });
+        const json = await res.json();
+        if (json.status === 'ok') {
+          if(typeof onDelete === 'function') onDelete(post.id);
+        } else {
+          alert(json.error || 'Failed to delete post');
+        } 
+      } catch (err) {
+        alert('Network error');
+      }
+    };
 
     const handleMouseEnter = () => {
       if (timeoutId) clearTimeout(timeoutId);
@@ -168,7 +190,7 @@ export default function Explore() {
     }, [post.id, user]);
 
     const handleClick = () => {
-  navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title, from: '/explore' } });
+      navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title, from: '/explore' } });
     };
 
     return (
@@ -202,14 +224,17 @@ export default function Explore() {
               className="absolute left-0 right-4 -bottom-3 flex justify-end gap-2 px-2 mt-10"
               style={{ pointerEvents: 'none' }}
             >
+              {/* Report/Flag */}
               <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer" style={{ pointerEvents: 'auto' }}>
                 <Flag size={16} />
               </div>
+              {/* Comment */}
               <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer" style={{ pointerEvents: 'auto' }}>
                 <div onClick={e => { e.stopPropagation(); navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title, from: '/explore', scrollToComments: true } }); }} aria-label="View comments">
                   <MessageCircle size={16} />
                 </div>
               </div>
+              {/* Like */}
               <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center flex border border-0.5 border-gray-200 transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer" style={{ pointerEvents: 'auto' }}>
                 <motion.button
                   aria-label={likes.liked_by_user ? 'Unlike' : 'Like'}
@@ -250,6 +275,12 @@ export default function Explore() {
                   <Heart size={16} className={likes.liked_by_user ? 'liked-heart' : ''} />
                 </motion.button>
               </div>
+              {/* Delete (Trash) icon for authorized users */}
+              {canDelete && (
+                <div className="rounded-full h-11 w-11 bg-white text-red-600 items-center justify-center flex border border-0.5 border-gray-200 transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer" style={{ pointerEvents: 'auto' }} onClick={e => { e.stopPropagation(); handleDelete(e); }} title="Delete post">
+                  <Trash2 size={16} />
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -309,7 +340,7 @@ export default function Explore() {
                 exit={{ x: -100, opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 60, damping: 18, delay: idx * 0.08 }}
               >
-                <PostCard post={post} />
+                <PostCard post={post} onDelete={handleDeletePost} />
               </motion.div>
             ))}
           </AnimatePresence>
