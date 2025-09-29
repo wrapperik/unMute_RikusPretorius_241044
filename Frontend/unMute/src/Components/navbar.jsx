@@ -132,7 +132,7 @@ export default function Navbar() {
       <div className="flex-1">
         <Link to="/" className="p-2 text-xl inline-flex items-center" aria-label="unMute home">
           {/* use public folder image; keep height similar to surrounding text */}
-          <img src="/unmute-bee-logo.svg" alt="unMute" className="h-10 w-auto" />
+          <img src="/u-logo.png" alt="unMute" className="h-10 w-auto" />
         </Link>
       </div>
 

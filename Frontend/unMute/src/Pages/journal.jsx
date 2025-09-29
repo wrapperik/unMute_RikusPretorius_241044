@@ -149,7 +149,7 @@ export default function JournalPage() {
                         key={m.key}
                         type="button"
                         onClick={() => setSelectedMood(m.key)}
-                        className={`px-6 py-2 rounded-full ${isActive ? 'bg-black text-white' : 'bg-gray-100 text-black'}`}
+                        className={`px-6 py-1 rounded-full ${isActive ? 'bg-black text-white' : 'bg-white text-black border-1 border-black'}`}
                         aria-pressed={isActive}
                       >
                         <span className="mr-2">{m.label}</span>
