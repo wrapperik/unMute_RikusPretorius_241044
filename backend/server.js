@@ -12,6 +12,8 @@ import cors from "cors";
 import authRoutes from "./routes/auth.js";
 import postsRoutes from "./routes/posts.js";
 import resourcesRoutes from "./routes/resources.js";
+import journalRoutes from "./routes/journal.js";
+import moodCheckinsRoutes from "./routes/moodcheckins.js";
 import { testConnection } from "./db.js";
 
 
@@ -32,6 +34,12 @@ app.use("/auth", authRoutes);
 app.use("/posts", postsRoutes);
 // e.g. GET /resources, POST /resources (admin), DELETE /resources/:id (admin)
 app.use("/resources", resourcesRoutes);
+// Journal entries endpoints (GET/POST/DELETE)
+app.use("/journal", journalRoutes);
+// Backwards-compatible alias: some frontend paths expect /addentry
+app.use("/addentry", journalRoutes);
+// Mood check-ins (POST creating check-ins tied to journal entries)
+app.use("/moodcheckins", moodCheckinsRoutes);
 
 // Example route
 app.get("/", (req, res) => {

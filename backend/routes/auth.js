@@ -22,8 +22,8 @@ router.post("/register", async (req, res) => {
     return res.status(400).json({ status: "error", error: "Email and password are required" });
   }
   try {
-    // Check if user exists
-    const [existing] = await pool.query("SELECT id FROM users WHERE email = ?", [email]);
+  // Check if user exists
+  const [existing] = await pool.query("SELECT user_id FROM users WHERE email = ?", [email]);
     if (existing.length > 0) {
       return res.status(409).json({ status: "error", error: "Email already registered" });
     }

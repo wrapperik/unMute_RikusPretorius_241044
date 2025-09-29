@@ -26,10 +26,12 @@ export default function BreadCrumbs() {
         crumbs.push({ label: LABELS[''] || 'Home', to: '/' });
     }
 
-    // Current page
+    // Current page - prefer titles when the route provides them in location.state
     let currentLabel;
     if (segments[0] === 'viewpost' && state && state.postTitle) {
         currentLabel = state.postTitle;
+    } else if (segments[0] === 'viewentry' && state && state.entryTitle) {
+        currentLabel = state.entryTitle;
     } else {
         const lastSeg = segments[segments.length - 1] || '';
         currentLabel = LABELS[lastSeg] || (lastSeg.charAt(0).toUpperCase() + lastSeg.slice(1)) || 'Current';
