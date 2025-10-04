@@ -83,7 +83,28 @@ export default function Navbar() {
 
   // NavLink class for active route (add flex & gap for icon + label)
   const navLinkClass = ({ isActive }) =>
-    `${isActive ? 'font-bold text-green-900' : ''} flex items-center gap-2`;
+    `flex items-center gap-2 px-2 py-2 mx-2
+    ${isActive ? 'font-bold text-black' : 'font-medium'}
+    bg-transparent border-none outline-none shadow-none custom-navlink`;
+
+  // Add custom CSS to override DaisyUI nav link background
+  if (typeof document !== 'undefined') {
+    const styleId = 'custom-navlink-style';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.innerHTML = `
+        .custom-navlink:active,
+        .custom-navlink:focus,
+        .custom-navlink:hover {
+          background: transparent !important;
+          box-shadow: none !important;
+          outline: none !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
 
   // Render menu items
   const renderLinks = (isMobile = false) => (
