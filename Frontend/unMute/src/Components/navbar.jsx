@@ -20,6 +20,7 @@ export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   // Close on escape key
   useEffect(() => {
@@ -28,6 +29,15 @@ export default function Navbar() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  // Detect scroll for navbar background
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 0);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Menu links based on user state
@@ -128,11 +138,11 @@ export default function Navbar() {
   );
 
   return (
-    <div className="navbar relative shadow-sm text-black bg-white sticky top-0 z-50 md:px-20 transition-colors">
+  <div className={`navbar relative bg-none text-black sticky top-0 z-50 md:px-20 transition-colors${scrolled ? ' bg-white shadow-sm' : ''}`}>
       <div className="flex-1">
         <Link to="/" className="p-2 text-xl inline-flex items-center" aria-label="unMute home">
           {/* use public folder image; keep height similar to surrounding text */}
-          <img src="/u-logo.png" alt="unMute" className="h-10 w-auto" />
+          <img src="/unmute.png" alt="unMute" className="h-10 w-auto" />
         </Link>
       </div>
 
