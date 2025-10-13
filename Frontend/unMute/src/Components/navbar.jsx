@@ -159,7 +159,7 @@ export default function Navbar() {
   );
 
   return (
-  <div className={`navbar relative bg-none text-black sticky top-0 z-50 md:px-20 transition-colors${scrolled ? ' bg-white shadow-sm' : ''}`}>
+  <div className={`navbar relative bg-none text-black sticky top-0 z-50 md:px-20 transition-colors${scrolled ? ' bg-white/50 shadow-sm backdrop-blur-md ' : ''}`}>
       <div className="flex-1">
         <Link to="/" className="p-2 text-xl inline-flex items-center" aria-label="unMute home">
           {/* use public folder image; keep height similar to surrounding text */}
