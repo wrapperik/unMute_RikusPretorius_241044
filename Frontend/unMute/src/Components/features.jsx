@@ -17,7 +17,7 @@ export default function Features() {
       {features.map((feature, index) => (
         <motion.div
           key={index}
-          className="card w-96 bg-black card-xl shadow-sm cursor-pointer transform transition duration-100 ease-out hover:scale-[1.03] hover:shadow-md group"
+          className="card w-96 border-2 border-black  card-xl rounded-3xl shadow-sm cursor-pointer transform transition duration-100 ease-out hover:scale-[1.03] hover:shadow-md hover:bg-black  group"
           initial={{ opacity: 0, x: 80 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, amount: 0.2 }}
@@ -30,7 +30,7 @@ export default function Features() {
               className="rounded-xl h-32 object-cover w-full transition-transform duration-300 group-hover:scale-110"
             />
           </figure> */}
-          <div className="card-body text-white">
+          <div className="card-body text-black hover:text-white">
             <h2 className="card-title text-2xl">{feature.title}</h2>
           </div>
         </motion.div>

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Plus } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
-import BreadCrumbs from './breadcrums'
+import BreadCrumbs from './breadCrums'
 
 export default function JournalPageHeader() {
   const location = useLocation()

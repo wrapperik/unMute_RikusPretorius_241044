@@ -1,7 +1,6 @@
 import { useContext, useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
-  Menu,
   Home as HomeIcon,
   Compass,
   BookOpen,
@@ -159,7 +158,7 @@ export default function Navbar() {
   );
 
   return (
-  <div className={`navbar relative bg-none text-black sticky top-0 z-50 md:px-20 transition-colors${scrolled ? ' bg-white/50 shadow-sm backdrop-blur-md ' : ''}`}>
+  <div className={`navbar relative bg-none text-black sticky mt-10 w-auto top-5 z-50 md:px-20 transition-all duration-300 ease-in-out${scrolled ? ' bg-white shadow-sm m-10 w-auto top-5 rounded-full ' : ' px-4 sm:px-6 '}`}>
       <div className="flex-1">
         <Link to="/" className="p-2 text-xl inline-flex items-center" aria-label="unMute home">
           {/* use public folder image; keep height similar to surrounding text */}
@@ -176,7 +175,12 @@ export default function Navbar() {
           onClick={() => setMobileOpen(o => !o)}
           className="btn btn-ghost btn-circle"
         >
-          <Menu className={`w-6 h-6 transition-transform duration-300 ${mobileOpen ? 'rotate-90' : ''}`} />
+          {/* Animated hamburger to X */}
+          <div className="w-6 h-6 flex flex-col justify-center items-center gap-[5px]">
+            <span className={`w-6 h-0.5 bg-current transition-all duration-300 origin-center ${mobileOpen ? 'rotate-45 translate-y-[7px]' : ''}`}></span>
+            <span className={`w-6 h-0.5 bg-current transition-all duration-300 ${mobileOpen ? 'opacity-0 scale-0' : 'opacity-100 scale-100'}`}></span>
+            <span className={`w-6 h-0.5 bg-current transition-all duration-300 origin-center ${mobileOpen ? '-rotate-45 -translate-y-[7px]' : ''}`}></span>
+          </div>
         </button>
       </div>
 
@@ -190,16 +194,17 @@ export default function Navbar() {
       {/* Full-width mobile dropdown panel */}
       <div
         id="mobile-nav"
-        className={`lg:hidden absolute left-0 top-full w-screen bg-white border-t border-gray-200 shadow-md overflow-hidden
-          transition-[max-height,opacity,transform] duration-300 ease-[cubic-bezier(.4,0,.2,1)] will-change-transform will-change-opacity
+        className={`lg:hidden absolute left-0 right-0 top-full w-full mt-2
+          transition-[max-height,opacity,transform,background-color,backdrop-filter] duration-300 ease-[cubic-bezier(.4,0,.2,1)] will-change-transform will-change-opacity
           motion-reduce:transition-none motion-reduce:max-h-full motion-reduce:opacity-100 motion-reduce:translate-y-0
+          ${scrolled ? 'bg-white/95 backdrop-blur-sm rounded-3xl shadow-md border-none overflow-hidden' : 'bg-white border-t border-gray-200 shadow-md overflow-hidden'}
           ${mobileOpen ? 'max-h-[520px] opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-4'}
         `}
         role="navigation"
         aria-label="Mobile"
         aria-hidden={!mobileOpen}
       >
-        <ul className="flex flex-col gap-4 p-6 items-end text-right font-medium">
+        <ul className="flex flex-col gap-4 p-6 items-center text-center font-medium">
           {renderLinks(true)}
         </ul>
       </div>

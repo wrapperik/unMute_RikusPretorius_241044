@@ -8,7 +8,7 @@ export default function Home() {
   <div className="min-h-screen w-full flex flex-col">
       {/* Header image section */}
       <div
-        className="w-full h-[60vh] bg-cover bg-center bg-no-repeat flex justify-center"
+        className=" h-[60vh] bg-cover bg-center bg-no-repeat rounded-3xl shadow-lg flex m-10 justify-center"
         style={{ backgroundImage: "url('/hero-mountain.png')" }}
       >
         <div className="max-w-xl px-6 md:px-12 text-center">
