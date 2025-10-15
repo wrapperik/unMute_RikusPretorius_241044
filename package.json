@@ -7,6 +7,6 @@
   },
   "scripts": {
     "start": "node backend/server.js",
-    "heroku-postbuild": "cd Frontend/unMute && npm install --legacy-peer-deps && npm run build"
+    "heroku-postbuild": "cd Frontend/unMute && npm install --legacy-peer-deps --include=dev && npm run build"
   }
 }
