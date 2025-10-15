@@ -50,7 +50,7 @@ input:-webkit-autofill::first-line { color: #000 !important; }
 
 body {
   font-family: "DM Sans", sans-serif;
-  background: radial-gradient(125% 125% at 50% 10%, #fff 40%, #bcc6d5 100%);
+  background: #ffffff;
   background-repeat: no-repeat;
 }
 

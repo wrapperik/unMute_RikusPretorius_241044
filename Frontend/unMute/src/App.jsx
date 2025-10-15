@@ -11,25 +11,30 @@ import ResourcesPage from './Pages/Resources.jsx'
 import JournalPage from './Pages/journal.jsx'
 import AddResourcePage from './Pages/addResource.jsx'
 import Navbar from './Components/navbar.jsx'
+import PageLoader from './Components/PageLoader.jsx'
+import Footer from './Components/footer.jsx'
 import './index.css';
 
 function App() {
   return (
     <Router>
       <Navbar />
-      <Routes>
-    <Route path="/" element={<Home />} />
-    <Route path="/signup" element={<Signup />} />
-    <Route path="/login" element={<Login />} />
-    <Route path="/explore" element={<Explore />} />
-    <Route path="/resources" element={<ResourcesPage />} />
-    <Route path="/addresource" element={<AddResourcePage />} />
-    <Route path="/addpost" element={<AddPostPage />} />
-  <Route path="/addentry" element={<AddEntryPage />} />
-    <Route path="/viewpost/:id" element={<ViewPostPage />} />
-  <Route path="/viewentry/:id" element={<ViewEntryPage />} />
-     <Route path="/journal" element={<JournalPage />} />
-      </Routes>
+      <PageLoader>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/explore" element={<Explore />} />
+          <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/addresource" element={<AddResourcePage />} />
+          <Route path="/addpost" element={<AddPostPage />} />
+          <Route path="/addentry" element={<AddEntryPage />} />
+          <Route path="/viewpost/:id" element={<ViewPostPage />} />
+          <Route path="/viewentry/:id" element={<ViewEntryPage />} />
+          <Route path="/journal" element={<JournalPage />} />
+        </Routes>
+      </PageLoader>
+      <Footer />
     </Router>
   )
 }
