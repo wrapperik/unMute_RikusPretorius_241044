@@ -15,6 +15,7 @@ import resourcesRoutes from "./routes/resources.js";
 import journalRoutes from "./routes/journal.js";
 import moodCheckinsRoutes from "./routes/moodcheckins.js";
 import { testConnection } from "./db.js";
+import path from "path";
 
 
 const app = express();
@@ -45,6 +46,17 @@ app.use("/moodcheckins", moodCheckinsRoutes);
 app.get("/", (req, res) => {
   res.json({ message: "Backend is running 🚀" });
 });
+
+// In production, serve the built frontend from the Vite build output
+if (process.env.NODE_ENV === "production") {
+  const staticPath = path.join(process.cwd(), "Frontend", "unMute", "dist");
+  app.use(express.static(staticPath));
+
+  // Return index.html for any other route so client-side routing works
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(staticPath, "index.html"));
+  });
+}
 
 // Start listening for incoming HTTP requests
 const PORT = process.env.PORT || 5050;

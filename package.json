@@ -1,0 +1,12 @@
+{
+  "name": "unmute-root",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": "18.x"
+  },
+  "scripts": {
+    "start": "node backend/server.js",
+    "heroku-postbuild": "cd Frontend/unMute && npm install --legacy-peer-deps && npm run build"
+  }
+}
