@@ -158,7 +158,7 @@ export default function Navbar() {
   );
 
   return (
-  <div className={`navbar relative bg-none text-black sticky mt-10 w-auto top-5 z-50 md:px-20 transition-all duration-300 ease-in-out${scrolled ? ' bg-white shadow-sm m-10 w-auto top-5 rounded-full ' : ' px-4 sm:px-6 '}`}>
+  <div className={`navbar relative bg-none text-black sticky mt-10 w-auto top-5 z-50 md:px-20 transition-all duration-300 ease-in-out${scrolled ? ' bg-white shadow-lg m-10 w-auto top-5 rounded-full ' : ' px-4 sm:px-6 '}`}>
       <div className="flex-1">
         <Link to="/" className="p-2 text-xl inline-flex items-center" aria-label="unMute home">
           {/* use public folder image; keep height similar to surrounding text */}

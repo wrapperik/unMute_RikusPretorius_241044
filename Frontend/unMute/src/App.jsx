@@ -10,6 +10,7 @@ import ViewEntryPage from './Pages/viewEntry.jsx';
 import ResourcesPage from './Pages/Resources.jsx'
 import JournalPage from './Pages/journal.jsx'
 import AddResourcePage from './Pages/addResource.jsx'
+import About from './Pages/about.jsx'
 import Navbar from './Components/navbar.jsx'
 import PageLoader from './Components/PageLoader.jsx'
 import Footer from './Components/footer.jsx'
@@ -32,6 +33,7 @@ function App() {
           <Route path="/viewpost/:id" element={<ViewPostPage />} />
           <Route path="/viewentry/:id" element={<ViewEntryPage />} />
           <Route path="/journal" element={<JournalPage />} />
+           <Route path="/about" element={<About />} />
         </Routes>
       </PageLoader>
       <Footer />

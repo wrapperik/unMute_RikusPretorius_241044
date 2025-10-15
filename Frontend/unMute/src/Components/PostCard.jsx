@@ -74,21 +74,21 @@ export default function PostCard({ post, onDelete }) {
 
   return (
     <div className="relative container" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      <div className="card-body card bg-white card-md rounded-3xl text-black shadow-sm m-2 h-auto cursor-pointer" onClick={handleClick}>
-        <div className="flex">
-          <h2 className="card-title flex-start">
+      <div className="card-body card bg-[#f7f7f7] card-md rounded-2xl text-black shadow-md hover:shadow-lg m-2 h-auto cursor-pointer transition-all duration-300 hover:scale-[1.005]" onClick={handleClick}>
+        <div className="flex flex-wrap gap-2">
+          <h2 className="card-title flex-start font-bold text-lg">
             {post.title}
-            <span className="ml-3 text-sm text-black/50">
+          </h2>
+          <span className="text-xs text-gray-500 flex items-center">
               by {post.raw && post.raw.is_anonymous ? 'Anonymous' : (post.username || '')}
             </span>
-          </h2>
           <div className="flex-end ml-auto flex items-center gap-2">
-            <p>{post.time}</p>
-            <h4 className={`card-title text-sm px-2 rounded-full ${post.topic ? 'bg-white border-1 border-base-500' : 'bg-white border-1 border-base-500'}`}>{post.topic}</h4>
+            <p className="text-xs font-medium text-gray-600">{post.time}</p>
+            <h4 className={`text-xs px-2 py-1 rounded-full font-semibold border-2 border-black bg-white`}>{post.topic}</h4>
           </div>
         </div>
-        <div className="h-0.5 w-full rounded bg-black/10"></div>
-        <p className="text-sm text-gray-800 line-clamp-4" style={{ display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+        <div className="h-0.5 w-full rounded bg-black/20 my-1"></div>
+        <p className="text-sm text-gray-700 line-clamp-4 leading-relaxed" style={{ display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {post.description}
         </p>
       </div>
@@ -109,15 +109,15 @@ function AnimateHolder({ show, canDelete, likes, onDelete, post, navigate, setLi
           className="absolute left-0 right-4 -bottom-3 flex justify-end gap-2 px-2 mt-10"
           style={{ pointerEvents: 'none' }}
         >
-          <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer" style={{ pointerEvents: 'auto' }}>
+          <div className="rounded-full h-10 w-10 bg-white text-black items-center justify-center border-[0.5px] border-[#c4c4c4] shadow-md flex transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-black hover:text-white cursor-pointer" style={{ pointerEvents: 'auto' }}>
             <Flag size={16} />
           </div>
-          <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer" style={{ pointerEvents: 'auto' }}>
+          <div className="rounded-full h-10 w-10 bg-white text-black items-center justify-center border-[0.5px] border-[#c4c4c4] shadow-md flex transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-black hover:text-white cursor-pointer" style={{ pointerEvents: 'auto' }}>
             <div onClick={e => { e.stopPropagation(); navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title, from: '/explore', scrollToComments: true } }); }} aria-label="View comments">
               <MessageCircle size={16} />
             </div>
           </div>
-          <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center flex border border-0.5 border-gray-200 transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer" style={{ pointerEvents: 'auto' }}>
+          <div className="rounded-full h-10 w-10 bg-white text-black items-center justify-center flex border-[0.5px] border-[#c4c4c4] shadow-md transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-black hover:text-white cursor-pointer" style={{ pointerEvents: 'auto' }}>
             <motion.button
               aria-label={likes.liked_by_user ? 'Unlike' : 'Like'}
               onClick={e => { e.stopPropagation();
@@ -149,7 +149,7 @@ function AnimateHolder({ show, canDelete, likes, onDelete, post, navigate, setLi
             </motion.button>
           </div>
           {canDelete && (
-            <div className="rounded-full h-11 w-11 bg-white text-red-600 items-center justify-center flex border border-0.5 border-gray-200 transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer" style={{ pointerEvents: 'auto' }} onClick={e => { e.stopPropagation(); onDelete(e); }} title="Delete post">
+            <div className="rounded-full h-10 w-10 bg-white text-red-600 items-center justify-center flex border-[0.5px] border-[#c4c4c4] shadow-md transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-red-600 hover:text-white cursor-pointer" style={{ pointerEvents: 'auto' }} onClick={e => { e.stopPropagation(); onDelete(e); }} title="Delete post">
               <Trash2 size={16} />
             </div>
           )}

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Plus } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
-import BreadCrumbs from './breadCrums'
+import BreadCrumbs from './breadCrumbs'
 
 export default function JournalPageHeader() {
   const location = useLocation()
@@ -10,7 +10,7 @@ export default function JournalPageHeader() {
        <BreadCrumbs />
       <div className="flex">
       <h1 className="text-black  font-medium text-4xl text-left">Journal</h1>
-      <Link to="/addentry" state={{ from: location.pathname }} className='btn rounded-full ml-auto text-black bg-white border-0 flex items-center gap-2'>
+      <Link to="/addentry" state={{ from: location.pathname }} className='btn rounded-full ml-auto bg-black text-white border-2 border-black hover:bg-white hover:text-black transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-lg px-5 py-2 font-medium text-sm'>
         <Plus size={16} />
         <span>New Entry</span>
       </Link>

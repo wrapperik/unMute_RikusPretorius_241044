@@ -39,17 +39,14 @@ export default function BreadCrumbs() {
     crumbs.push({ label: currentLabel, to: pathname, isLast: true });
 
     return (
-        <nav className="breadcrumbs text-sm mb-5" aria-label="Breadcrumb">
-            <ul className="flex gap-0.5 items-center">
+        <nav className="breadcrumbs text-sm mb-6" aria-label="Breadcrumb">
+            <ul className="flex gap-3 items-center">
                 {crumbs.map((c, i) => (
-                    <li key={i} className="flex items-center">
+                    <li key={i}>
                         {!c.isLast ? (
-                            <>
-                                <Link to={c.to} className="text-gray-600 hover:underline">{c.label}</Link>
-                                <span className="mx-2 text-gray-400">&gt;</span>
-                            </>
+                            <Link to={c.to} className="text-gray-600 hover:text-black hover:underline font-medium transition-colors duration-200">{c.label}</Link>
                         ) : (
-                            <span className="text-black">{c.label}</span>
+                            <span className="text-black font-bold">{c.label}</span>
                         )}
                     </li>
                 ))}

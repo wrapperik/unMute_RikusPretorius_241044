@@ -134,10 +134,10 @@ export default function Explore() {
       <PageHeader />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-col lg:flex-row gap-12">
         {/* Filtering System */}
-        <aside className="text-black w-full lg:w-1/3 lg:sticky top-28 self-start" aria-label="Filter posts by topic">
-          <h1 className="text-xl font-bold">Browse by Topic</h1>
-          <div className="text-black flex mt-5">
-            <ul className="space-y-4 w-full" role="list">
+        <aside className="text-black w-full lg:w-1/3 lg:sticky top-28 self-start bg-white rounded-2xl" aria-label="Filter posts by topic">
+          <h1 className="text-xl font-bold mb-4">Browse by Topic</h1>
+          <div className="text-black flex">
+            <ul className="space-y-2 w-full" role="list">
               <li>
                 <div
                   role="button"
@@ -145,10 +145,16 @@ export default function Explore() {
                   aria-pressed={selectedTopic === 'All'}
                   onClick={() => setSelectedTopic('All')}
                   onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setSelectedTopic('All')}
-                  className="flex w-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md"
+                  className={`flex w-50 p-2 rounded-xl cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black ${
+                    selectedTopic === 'All' 
+                      ? 'bg-black text-white shadow-sm' 
+                      : 'bg-white hover:bg-gray-100 border-2 border-gray-200 hover:border-black'
+                  }`}
                 >
-                  <h2 className="flex-start">All</h2>
-                  <h2 className="ml-auto bg-white px-3 py-0.5 rounded-full">{posts.length}</h2>
+                  <h2 className="flex-start font-medium text-sm">All</h2>
+                  <h2 className={`ml-auto px-2 py-0.5 rounded-full text-xs font-semibold ${
+                    selectedTopic === 'All' ? 'bg-white text-black' : 'bg-black text-white'
+                  }`}>{posts.length}</h2>
                 </div>
               </li>
               {Object.entries(topics).map(([topic, count]) => (
@@ -159,10 +165,16 @@ export default function Explore() {
                     aria-pressed={selectedTopic === topic}
                     onClick={() => setSelectedTopic(topic)}
                     onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setSelectedTopic(topic)}
-                    className="flex w-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md"
+                    className={`flex w-50 p-2 rounded-xl cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black ${
+                      selectedTopic === topic 
+                        ? 'bg-black text-white shadow-sm' 
+                        : 'bg-white hover:bg-gray-100 border-2 border-gray-200 hover:border-black'
+                    }`}
                   >
-                    <h2 className={`flex-start px-3 py-0.5 rounded-full ${topicColors[topic] || topicColors.Other}`}>{topic}</h2>
-                    <h2 className="ml-auto bg-white px-3 py-0.5 rounded-full">{count}</h2>
+                    <h2 className="flex-start font-medium text-sm">{topic}</h2>
+                    <h2 className={`ml-auto px-2 py-0.5 rounded-full text-xs font-semibold ${
+                      selectedTopic === topic ? 'bg-white text-black' : 'bg-black text-white'
+                    }`}>{count}</h2>
                   </div>
                 </li>
               ))}

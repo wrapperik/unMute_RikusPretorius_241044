@@ -131,7 +131,7 @@ export default function ResourcesPage() {
 
     return (
       <div className="relative container">
-        <div className="card-body card bg-white card-md rounded-3xl text-black shadow-sm m-2 h-auto cursor-pointer" onClick={handleClick}>
+        <div className="card-body card bg-[#f7f7f7] card-md rounded-3xl text-black shadow-sm m-2 h-auto cursor-pointer" onClick={handleClick}>
           <div className="flex">
             <h2 className="card-title flex-start">{post.title}</h2>
             <div className="ml-auto text-sm text-black/50 flex items-center gap-2">

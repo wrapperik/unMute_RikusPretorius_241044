@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { Plus } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
-import BreadCrumbs from './breadcrums'
+import BreadCrumbs from './breadCrumbs.jsx'
 import { AuthContext } from '../context/AuthContext.jsx'
 
 export default function ResourcesPageHeader() {
@@ -17,7 +17,7 @@ export default function ResourcesPageHeader() {
           <Link
             to="/addresource"
             state={{ from: location.pathname }}
-            className='btn rounded-full ml-auto text-black bg-white border-0 flex items-center gap-2'
+            className='btn rounded-full ml-auto bg-black text-white border-2 border-black hover:bg-white hover:text-black transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-lg px-5 py-2 font-medium text-sm'
           >
             <Plus size={16} />
             <span>Add Resource</span>

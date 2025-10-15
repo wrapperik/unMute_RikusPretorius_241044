@@ -1,6 +1,6 @@
 import React from 'react'
 import { Send } from 'lucide-react'
-import BreadCrumbs from './breadcrums'
+import BreadCrumbs from './breadCrumbs'
 
 export default function ViewPostPageHeader() {
   return (

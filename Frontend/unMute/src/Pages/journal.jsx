@@ -116,9 +116,9 @@ export default function JournalPage() {
     <>
       <JournalPageHeader />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-col lg:flex-row gap-12">
-        <aside className="text-black w-full lg:w-1/3 lg:sticky top-28 self-start" aria-label="Filter posts by mood">
-          <h1 className="text-xl font-bold">Browse by Mood</h1>
-          <div className="text-black mt-5">
+        <aside className="text-black w-full lg:w-1/3 lg:sticky top-28 self-start bg-white rounded-2xl" aria-label="Filter posts by mood">
+          <h1 className="text-xl font-bold mb-4">Browse by Mood</h1>
+          <div className="text-black flex">
             {/* Mood selector chips */}
             {(() => {
               // compute mood counts from journal posts
@@ -140,24 +140,33 @@ export default function JournalPage() {
               ];
 
               return (
-                <div className="flex flex-wrap gap-4">
+                <ul className="space-y-2 w-full" role="list">
                   {moodOptions.map(m => {
                     const count = m.key === 'All' ? posts.filter(p => p.__type === 'journal').length : (moodCounts[m.key] || 0);
                     const isActive = selectedMood === m.key || (selectedMood === 'All' && m.key === 'All');
                     return (
-                      <button
-                        key={m.key}
-                        type="button"
-                        onClick={() => setSelectedMood(m.key)}
-                        className={`px-6 py-1 rounded-full ${isActive ? 'bg-black text-white' : 'bg-white text-black border-1 border-black'}`}
-                        aria-pressed={isActive}
-                      >
-                        <span className="mr-2">{m.label}</span>
-                        <span className="bg-white text-black px-2 py-0.5 rounded-full text-sm ml-2">{count}</span>
-                      </button>
+                      <li key={m.key}>
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          aria-pressed={isActive}
+                          onClick={() => setSelectedMood(m.key)}
+                          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setSelectedMood(m.key)}
+                          className={`flex w-50 p-2 rounded-xl cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black ${
+                            isActive 
+                              ? 'bg-black text-white shadow-sm' 
+                              : 'bg-white hover:bg-gray-100 border-2 border-gray-200 hover:border-black'
+                          }`}
+                        >
+                          <h2 className="flex-start font-medium text-sm">{m.label}</h2>
+                          <h2 className={`ml-auto px-2 py-0.5 rounded-full text-xs font-semibold ${
+                            isActive ? 'bg-white text-black' : 'bg-black text-white'
+                          }`}>{count}</h2>
+                        </div>
+                      </li>
                     );
                   })}
-                </div>
+                </ul>
               );
             })()}
           </div>

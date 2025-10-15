@@ -68,11 +68,11 @@ export default function JournalEntryCard({ entry, onDelete }) {
   const createdAt = entry.created_at ? new Date(entry.created_at) : null;
 
   const moodMap = {
-    'frustrated': { label: 'Frustrated', emoji: '😣' },
-    'sad': { label: 'Sad', emoji: '☹️' },
-    'indifferent': { label: 'Indifferent', emoji: '😐' },
-    'happy': { label: 'Happy', emoji: '🙂' },
-    'excited': { label: 'Excited', emoji: '🤩' },
+    'frustrated': { label: 'Frustrated'},
+    'sad': { label: 'Sad'},
+    'indifferent': { label: 'Indifferent'},
+    'happy': { label: 'Happy'},
+    'excited': { label: 'Excited'},
   };
   const moodForEntry = entry.mood || entry.mood_label || null;
 
@@ -83,7 +83,7 @@ export default function JournalEntryCard({ entry, onDelete }) {
 
   return (
     <div className="relative container" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      <div className="card-body card bg-secondary/25 card-md rounded-3xl text-black shadow-sm m-2 h-auto cursor-pointer" onClick={handleClick}>
+      <div className="card-body card bg-[#f7f7f7] card-md rounded-3xl text-black shadow-sm m-2 h-auto cursor-pointer" onClick={handleClick}>
         <div className="flex">
           <h2 className="card-title flex-start">
             {entry.title || `Entry ${entry.entry_id}`}

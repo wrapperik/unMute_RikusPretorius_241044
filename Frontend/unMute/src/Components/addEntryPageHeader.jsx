@@ -1,6 +1,6 @@
 import React from 'react'
 import { Save } from 'lucide-react'
-import BreadCrumbs from './breadcrums'
+import BreadCrumbs from './breadCrumbs'
 
 export default function AddEntryPageHeader({ onSave, submitting, titleOverride }) {
   return (
