@@ -10,20 +10,21 @@ export default function Features() {
   ]
 
   return (
-    <><div>
-      <h1 className="text-black mt-10 font-medium text-3xl text-center">What we offer</h1>
-      </div>
-    <div className="p-6 mb-10 flex justify-center items-center flex-row flex-wrap gap-6">
+    <>
+    {/* // <div>
+    //   <h1 className="text-black mt-10 font-medium text-3xl text-center">What we offer</h1>
+    //   </div> */}
+    <div className="w-full mb-10 flex justify-center items-center flex-row flex-wrap gap-6">
       {features.map((feature, index) => (
         <motion.div
           key={index}
-          className="card min-h-40 w-96 border-2 border-black card-xl rounded-3xl shadow-sm cursor-pointer transform transition duration-100 ease-out hover:scale-[1.03] hover:shadow-md hover:bg-black group relative overflow-hidden"
+          className="card min-h-40 w-96 border-2 border-[#004643] card-xl rounded-3xl shadow-sm cursor-pointer transform transition duration-100 ease-out hover:scale-[1.03] hover:shadow-md hover:bg-[#004643] group relative overflow-hidden"
           initial={{ opacity: 0, x: 80 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.6, delay: index * 0.15, type: 'spring' }}
         >
-          <div className="card-body text-black group-hover:text-white">
+          <div className="card-body text-[#004643] group-hover:text-white">
             <h2 className="card-title text-2xl">{feature.title}</h2>
           </div>
           <figure className="absolute bottom-2 right-2 pointer-events-none">

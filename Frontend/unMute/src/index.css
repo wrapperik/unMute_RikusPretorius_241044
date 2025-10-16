@@ -101,6 +101,129 @@ body {
   stroke: none !important;
 }
 
+/* Cloud animation layer */
+.cloud-layer-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  transition: transform 0.1s ease-out;
+}
+
+.cloud-img {
+  position: absolute;
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* Diverse keyframes for natural cloud movement */
+@keyframes cloudDrift1 {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(30px, -10px); }
+  50% { transform: translate(60px, -5px); }
+  75% { transform: translate(35px, -15px); }
+}
+
+@keyframes cloudDrift2 {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-25px, 8px); }
+  50% { transform: translate(-50px, 3px); }
+  75% { transform: translate(-30px, 12px); }
+}
+
+@keyframes cloudDrift3 {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(40px, -8px); }
+  66% { transform: translate(80px, -3px); }
+}
+
+@keyframes cloudDrift4 {
+  0%, 100% { transform: translate(0, 0); }
+  30% { transform: translate(-35px, 10px); }
+  60% { transform: translate(-70px, 5px); }
+  90% { transform: translate(-40px, 8px); }
+}
+
+@keyframes cloudDrift5 {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(45px, -12px); }
+  50% { transform: translate(90px, -6px); }
+  75% { transform: translate(50px, -10px); }
+}
+
+@keyframes cloudDrift6 {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-30px, 6px); }
+  40% { transform: translate(-60px, 12px); }
+  60% { transform: translate(-45px, 8px); }
+  80% { transform: translate(-20px, 4px); }
+}
+
+@keyframes cloudDrift7 {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(35px, -10px); }
+  66% { transform: translate(70px, -15px); }
+}
+
+@keyframes cloudDrift8 {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-40px, 8px); }
+  50% { transform: translate(-80px, 4px); }
+  75% { transform: translate(-45px, 10px); }
+}
+
+@keyframes cloudDrift9 {
+  0%, 100% { transform: translate(0, 0); }
+  30% { transform: translate(50px, -8px); }
+  60% { transform: translate(100px, -12px); }
+  90% { transform: translate(60px, -6px); }
+}
+
+@keyframes cloudDrift10 {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(55px, -15px); }
+  50% { transform: translate(110px, -8px); }
+  75% { transform: translate(65px, -12px); }
+}
+
+@keyframes cloudDrift11 {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-45px, 10px); }
+  40% { transform: translate(-90px, 5px); }
+  60% { transform: translate(-70px, 8px); }
+  80% { transform: translate(-35px, 12px); }
+}
+
+@keyframes cloudDrift12 {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(50px, -10px); }
+  66% { transform: translate(100px, -18px); }
+}
+
+@keyframes cloudDrift13 {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-50px, 12px); }
+  50% { transform: translate(-100px, 6px); }
+  75% { transform: translate(-60px, 10px); }
+}
+
+@keyframes cloudDrift14 {
+  0%, 100% { transform: translate(0, 0); }
+  30% { transform: translate(60px, -12px); }
+  60% { transform: translate(120px, -6px); }
+  90% { transform: translate(70px, -10px); }
+}
+
+@keyframes cloudDrift15 {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-55px, 15px); }
+  50% { transform: translate(-110px, 8px); }
+  75% { transform: translate(-65px, 12px); }
+}
+
 /* 
 button {
   border: 1px solid transparent;

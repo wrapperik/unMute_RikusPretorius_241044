@@ -5,19 +5,17 @@ export default function Footer() {
     <footer className="bg-white text-black mt-20 p-10 border-t border-gray-200">
   <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center gap-6">
         <nav className="flex-1 text-center sm:text-left">
-          <h6 className="footer-title">Services</h6>
-          <a className="link link-hover block">Branding</a>
-          <a className="link link-hover block">Design</a>
-          <a className="link link-hover block">Marketing</a>
-          <a className="link link-hover block">Advertisement</a>
+          <h6 className="footer-title">Features</h6>
+          <a className="link link-hover block">Explore</a>
+          <a className="link link-hover block">Journal</a>
+          <a className="link link-hover block">Resources</a>
+          <a className="link link-hover block">Account</a>
         </nav>
 
         <nav className="flex-1 text-center sm:text-left">
           <h6 className="footer-title">Company</h6>
           <a className="link link-hover block">About us</a>
           <a className="link link-hover block">Contact</a>
-          <a className="link link-hover block">Jobs</a>
-          <a className="link link-hover block">Press kit</a>
         </nav>
 
         <nav className="flex-1 text-center sm:text-right">

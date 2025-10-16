@@ -31,7 +31,7 @@ export default function HomeAbout() {
 
           <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-4 pt-4">
             <motion.button 
-              className="group px-8 py-4 bg-black text-white rounded-3xl font-medium flex items-center justify-center gap-2 border-2 border-black hover:bg-white hover:text-black transition-all duration-300"
+              className="group px-8 py-4 bg-[#004643] text-white rounded-3xl font-medium flex items-center justify-center gap-2 border-2 border-black hover:bg-white hover:text-[#004643] transition-all duration-300"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -40,7 +40,7 @@ export default function HomeAbout() {
             </motion.button>
             
             <motion.button 
-              className="group px-8 py-4 bg-white border-2 border-black text-black rounded-3xl font-medium flex items-center justify-center gap-2 hover:bg-black hover:text-white transition-all duration-300"
+              className="group px-8 py-4 bg-white border-2 border-[#004643] text-[#004643] rounded-3xl font-medium flex items-center justify-center gap-2  hover:text-[#004643] transition-all duration-300"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.95 }}
             >
