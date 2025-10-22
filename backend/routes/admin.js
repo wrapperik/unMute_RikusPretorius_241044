@@ -39,7 +39,7 @@ router.get('/flagged-posts', requireAdmin, async (req, res) => {
       `SELECT p.post_id, p.user_id, p.content, p.title, p.topic, p.is_anonymous, p.is_flagged, p.flagged_at, p.created_at,
               u.username
        FROM PublicPosts p
-       LEFT JOIN Users u ON u.user_id = p.user_id
+       LEFT JOIN users u ON u.user_id = p.user_id
        WHERE p.is_flagged = 1
        ORDER BY p.flagged_at DESC
        LIMIT 200`
@@ -71,8 +71,8 @@ router.get('/flagged-comments', requireAdmin, async (req, res) => {
     const [rows] = await pool.query(
       `SELECT c.comment_id, c.post_id, c.user_id, c.content, c.is_flagged, c.flagged_at, c.created_at,
               u.username, p.title as post_title
-       FROM Comments c
-       LEFT JOIN Users u ON u.user_id = c.user_id
+       FROM comments c
+       LEFT JOIN users u ON u.user_id = c.user_id
        LEFT JOIN PublicPosts p ON p.post_id = c.post_id
        WHERE c.is_flagged = 1
        ORDER BY c.flagged_at DESC
@@ -119,12 +119,12 @@ router.delete('/posts/:id', requireAdmin, async (req, res) => {
 router.delete('/comments/:id', requireAdmin, async (req, res) => {
   try {
     const commentId = req.params.id;
-    const [rows] = await pool.query('SELECT comment_id FROM Comments WHERE comment_id = ? LIMIT 1', [commentId]);
+    const [rows] = await pool.query('SELECT comment_id FROM comments WHERE comment_id = ? LIMIT 1', [commentId]);
     if (rows.length === 0) {
       return res.status(404).json({ status: 'error', error: 'Comment not found' });
     }
 
-    await pool.query('DELETE FROM Comments WHERE comment_id = ?', [commentId]);
+    await pool.query('DELETE FROM comments WHERE comment_id = ?', [commentId]);
     res.json({ status: 'ok', message: 'Comment deleted successfully' });
   } catch (err) {
     console.error('DELETE /admin/comments/:id error:', err);
@@ -153,12 +153,12 @@ router.post('/posts/:id/unflag', requireAdmin, async (req, res) => {
 router.post('/comments/:id/unflag', requireAdmin, async (req, res) => {
   try {
     const commentId = req.params.id;
-    const [rows] = await pool.query('SELECT comment_id FROM Comments WHERE comment_id = ? LIMIT 1', [commentId]);
+    const [rows] = await pool.query('SELECT comment_id FROM comments WHERE comment_id = ? LIMIT 1', [commentId]);
     if (rows.length === 0) {
       return res.status(404).json({ status: 'error', error: 'Comment not found' });
     }
 
-    await pool.query('UPDATE Comments SET is_flagged = 0, flagged_at = NULL WHERE comment_id = ?', [commentId]);
+    await pool.query('UPDATE comments SET is_flagged = 0, flagged_at = NULL WHERE comment_id = ?', [commentId]);
     res.json({ status: 'ok', message: 'Comment unflagged successfully' });
   } catch (err) {
     console.error('POST /admin/comments/:id/unflag error:', err);
