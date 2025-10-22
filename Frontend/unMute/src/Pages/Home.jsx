@@ -17,10 +17,10 @@ export default function Home() {
         {/* Cloud layer behind the transparent hero image */}
         <CloudLayer />
         
-        {/* Mountain and birds - transparent PNG on top */}
+        {/* Mountain and birds - transparent PNG on top (Cloudinary) */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat z-20"
-          style={{ backgroundImage: "url('/transparent-hero.png')" }}
+          style={{ backgroundImage: "url('https://res.cloudinary.com/dir5vkg3u/image/upload/v1761170791/hero-mountain_2_i3yso5.png')" }}
         />
         
         <div className="max-w-xl px-6 md:px-12 text-center relative z-30">
