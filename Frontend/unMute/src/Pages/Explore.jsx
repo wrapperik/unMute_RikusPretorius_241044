@@ -29,9 +29,20 @@ export default function Explore() {
   const [error, setError] = useState(null);
   // State for selected topic filter
   const [selectedTopic, setSelectedTopic] = useState('All');
+  const [isFiltering, setIsFiltering] = useState(false);
+  
   const handleDeletePost = (postId) => {
     setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
-  }
+  };
+
+  const handleTopicChange = (topic) => {
+    setIsFiltering(true);
+    setSelectedTopic(topic);
+    // Add a small delay to show the transition
+    setTimeout(() => {
+      setIsFiltering(false);
+    }, 400);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -132,47 +143,49 @@ export default function Explore() {
   return (
     <>
       <PageHeader />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-col lg:flex-row gap-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-col lg:flex-row gap-8">
         {/* Filtering System */}
-        <aside className="text-black w-full lg:w-1/3 lg:sticky top-28 self-start bg-white rounded-2xl" aria-label="Filter posts by topic">
-          <h1 className="text-xl font-bold mb-4">Browse by Topic</h1>
-          <div className="text-black flex">
-            <ul className="space-y-2 w-full" role="list">
-              <li>
+        <aside className="text-black w-full lg:w-72 lg:sticky top-28 self-start rounded-2xl lg:rounded-2xl md:rounded-2xl" aria-label="Filter posts by topic">
+          <h1 className="text-xl font-bold mb-4 flex items-center gap-2 hidden md:flex">
+            🎯 Browse Topics
+          </h1>
+          <div className="text-black flex md:flex">
+            <ul className="space-y-2 w-full md:space-y-2 flex md:flex-col overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 gap-2 md:gap-0" role="list">
+              <li className="flex-shrink-0 md:flex-shrink">
                 <div
                   role="button"
                   tabIndex={0}
                   aria-pressed={selectedTopic === 'All'}
-                  onClick={() => setSelectedTopic('All')}
-                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setSelectedTopic('All')}
-                  className={`flex w-50 p-2 rounded-xl cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black ${
+                  onClick={() => handleTopicChange('All')}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleTopicChange('All')}
+                  className={`flex items-center whitespace-nowrap px-3 md:px-2 py-2 md:py-2 rounded-xl cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black text-sm md:text-sm ${
                     selectedTopic === 'All' 
                       ? 'bg-black text-white shadow-sm' 
                       : 'bg-white hover:bg-gray-100 border-2 border-gray-200 hover:border-black'
                   }`}
                 >
-                  <h2 className="flex-start font-medium text-sm">All</h2>
-                  <h2 className={`ml-auto px-2 py-0.5 rounded-full text-xs font-semibold ${
+                  <h2 className="font-medium text-xs md:text-sm">All</h2>
+                  <h2 className={`ml-2 md:ml-auto px-1.5 md:px-2 py-0.5 rounded-full text-xs font-semibold ${
                     selectedTopic === 'All' ? 'bg-white text-black' : 'bg-black text-white'
                   }`}>{posts.length}</h2>
                 </div>
               </li>
               {Object.entries(topics).map(([topic, count]) => (
-                <li key={topic}>
+                <li key={topic} className="flex-shrink-0 md:flex-shrink">
                   <div
                     role="button"
                     tabIndex={0}
                     aria-pressed={selectedTopic === topic}
-                    onClick={() => setSelectedTopic(topic)}
-                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setSelectedTopic(topic)}
-                    className={`flex w-50 p-2 rounded-xl cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black ${
+                    onClick={() => handleTopicChange(topic)}
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleTopicChange(topic)}
+                    className={`flex items-center whitespace-nowrap px-3 md:px-2 py-2 md:py-2 rounded-xl cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black text-sm md:text-sm ${
                       selectedTopic === topic 
                         ? 'bg-black text-white shadow-sm' 
                         : 'bg-white hover:bg-gray-100 border-2 border-gray-200 hover:border-black'
                     }`}
                   >
-                    <h2 className="flex-start font-medium text-sm">{topic}</h2>
-                    <h2 className={`ml-auto px-2 py-0.5 rounded-full text-xs font-semibold ${
+                    <h2 className="font-medium text-xs md:text-sm">{topic}</h2>
+                    <h2 className={`ml-2 md:ml-auto px-1.5 md:px-2 py-0.5 rounded-full text-xs font-semibold ${
                       selectedTopic === topic ? 'bg-white text-black' : 'bg-black text-white'
                     }`}>{count}</h2>
                   </div>
@@ -182,21 +195,42 @@ export default function Explore() {
           </div>
         </aside>
 
-        {/* Cards Section */}
-        <section className="flex flex-col gap-8 w-full lg:w-2/3 " aria-live="polite" aria-label="Posts list">
-          <AnimatePresence>
-            {filteredPosts.map((post, idx) => (
-              <motion.div
-                key={post.id}
-                initial={{ x: 100, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: -100, opacity: 0 }}
-                transition={{ type: 'spring', stiffness: 60, damping: 18, delay: idx * 0.08 }}
-              >
-                <PostCard post={post} onDelete={handleDeletePost} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
+        {/* Cards Section - Pinterest Masonry Layout */}
+        <section 
+          className="flex-1 masonry-grid" 
+          aria-live="polite" 
+          aria-label="Posts list"
+        >
+          {isFiltering ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+            </div>
+          ) : (
+            <AnimatePresence mode="wait">
+              {filteredPosts.map((post, idx) => (
+                <motion.div
+                  key={post.id}
+                  initial={{ scale: 0.8, opacity: 0, y: 50 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.8, opacity: 0, transition: { duration: 0.2 } }}
+                  transition={{ 
+                    type: 'spring', 
+                    stiffness: 100, 
+                    damping: 15, 
+                    delay: idx * 0.03 
+                  }}
+                  style={{
+                    breakInside: 'avoid',
+                    marginBottom: '1.5rem',
+                    display: 'inline-block',
+                    width: '100%'
+                  }}
+                >
+                  <PostCard post={post} onDelete={handleDeletePost} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          )}
         </section>
       </main>
     </>

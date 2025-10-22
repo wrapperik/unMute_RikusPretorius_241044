@@ -72,25 +72,42 @@ export default function PostCard({ post, onDelete }) {
     navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title, from: '/explore' } });
   };
 
+  // Calculate dynamic line clamp based on content length
+  const getLineClamp = () => {
+    const contentLength = post.description.length;
+    if (contentLength < 100) return 3;
+    if (contentLength < 200) return 5;
+    if (contentLength < 400) return 8;
+    return 12;
+  };
+
   return (
-    <div className="relative container" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      <div className="card-body card bg-[#f7f7f7] card-md rounded-2xl text-black shadow-md hover:shadow-lg m-2 h-auto cursor-pointer transition-all duration-300 hover:scale-[1.005]" onClick={handleClick}>
-        <div className="flex flex-wrap gap-2">
-          <h2 className="card-title flex-start font-bold text-lg">
-            {post.title}
-          </h2>
-          <span className="text-xs text-gray-500 flex items-center">
-              by {post.raw && post.raw.is_anonymous ? 'Anonymous' : (post.username || '')}
+    <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <div className="card-body card bg-white rounded-2xl text-black shadow-md hover:shadow-2xl p-6 h-auto cursor-pointer transition-all duration-300 hover:-translate-y-1 border border-gray-100" onClick={handleClick}>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start justify-between gap-2">
+            <h2 className="card-title font-bold text-base leading-tight flex-1">
+              {post.title}
+            </h2>
+            <h4 className={`text-xs px-3 py-1 rounded-full font-semibold border-2 border-black bg-white whitespace-nowrap`}>{post.topic}</h4>
+          </div>
+          
+          <p className="text-sm text-gray-700 leading-relaxed" style={{ 
+            display: '-webkit-box', 
+            WebkitLineClamp: getLineClamp(), 
+            WebkitBoxOrient: 'vertical', 
+            overflow: 'hidden' 
+          }}>
+            {post.description}
+          </p>
+
+          <div className="flex items-center justify-between mt-2 pt-3 border-t border-gray-100">
+            <span className="text-xs text-gray-500">
+              by {post.raw && post.raw.is_anonymous ? 'Anonymous' : (post.username || 'Unknown')}
             </span>
-          <div className="flex-end ml-auto flex items-center gap-2">
-            <p className="text-xs font-medium text-gray-600">{post.time}</p>
-            <h4 className={`text-xs px-2 py-1 rounded-full font-semibold border-2 border-black bg-white`}>{post.topic}</h4>
+            <p className="text-xs font-medium text-gray-400">{post.time}</p>
           </div>
         </div>
-        <div className="h-0.5 w-full rounded bg-black/20 my-1"></div>
-        <p className="text-sm text-gray-700 line-clamp-4 leading-relaxed" style={{ display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-          {post.description}
-        </p>
       </div>
       <AnimateHolder show={showReactions} posts={{}} canDelete={canDelete} likes={likes} onDelete={handleDelete} post={post} navigate={navigate} setLikes={setLikes} user={user} />
     </div>
@@ -109,7 +126,29 @@ function AnimateHolder({ show, canDelete, likes, onDelete, post, navigate, setLi
           className="absolute left-0 right-4 -bottom-3 flex justify-end gap-2 px-2 mt-10"
           style={{ pointerEvents: 'none' }}
         >
-          <div className="rounded-full h-10 w-10 bg-white text-black items-center justify-center border-[0.5px] border-[#c4c4c4] shadow-md flex transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-black hover:text-white cursor-pointer" style={{ pointerEvents: 'auto' }}>
+          <div 
+            onClick={e => { 
+              e.stopPropagation(); 
+              if (!user || !user.token) { navigate('/login'); return; }
+              if (!confirm('Flag this post for review?')) return;
+              fetch(`${API_BASE}/posts/${post.id}/flag`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${user.token}` }
+              })
+                .then(res => res.json())
+                .then(json => {
+                  if (json.status === 'ok') {
+                    alert('Post flagged for review');
+                  } else {
+                    alert(json.error || 'Failed to flag post');
+                  }
+                })
+                .catch(() => alert('Network error'));
+            }} 
+            className="rounded-full h-10 w-10 bg-white text-black items-center justify-center border-[0.5px] border-[#c4c4c4] shadow-md flex transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-black hover:text-white cursor-pointer" 
+            style={{ pointerEvents: 'auto' }}
+            aria-label="Flag post"
+          >
             <Flag size={16} />
           </div>
           <div className="rounded-full h-10 w-10 bg-white text-black items-center justify-center border-[0.5px] border-[#c4c4c4] shadow-md flex transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-black hover:text-white cursor-pointer" style={{ pointerEvents: 'auto' }}>

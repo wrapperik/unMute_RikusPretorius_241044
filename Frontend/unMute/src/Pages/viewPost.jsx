@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import ViewPostPageHeader from '../Components/viewPostPageHeader';
 import CommentSection from '../Components/commentSection';
 import { motion } from 'framer-motion';
-import { Heart } from 'lucide-react'
+import { Heart, Trash2, XCircle, AlertTriangle } from 'lucide-react'
 import { MessageCircle } from 'lucide-react'
 import { Flag } from 'lucide-react'
 import { AuthContext } from '../context/AuthContext';
@@ -37,12 +37,14 @@ export default function ViewPostPage() {
     };
     const { id } = useParams();
     const { state } = useLocation();
+    const navigate = useNavigate();
     const postTitle = state && state.postTitle;
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const { user } = useContext(AuthContext);
     const [likes, setLikes] = useState({ count: 0, liked_by_user: false });
+    const isAdmin = user && (user.is_admin || user.isAdmin);
 
     useEffect(() => {
         fetch(`${API_BASE}/posts/${id}`)
@@ -83,19 +85,59 @@ export default function ViewPostPage() {
             return () => { mounted = false; };
         }, [id, user]);
 
+    const handleDeletePost = async () => {
+        if (!confirm('Delete this post permanently? This action cannot be undone.')) return;
+        try {
+            const res = await fetch(`${API_BASE}/admin/posts/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${user.token}` }
+            });
+            const json = await res.json();
+            if (res.ok && json.status === 'ok') {
+                alert('Post deleted successfully');
+                navigate('/explore');
+            } else {
+                alert(json.error || 'Failed to delete post');
+            }
+        } catch (err) {
+            alert('Network error');
+        }
+    };
+
+    const handleDismissFlag = async () => {
+        if (!confirm('Remove flag from this post?')) return;
+        try {
+            const res = await fetch(`${API_BASE}/admin/posts/${id}/unflag`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${user.token}` }
+            });
+            const json = await res.json();
+            if (res.ok && json.status === 'ok') {
+                alert('Flag dismissed');
+                setPost(prev => ({ ...prev, is_flagged: false, flagged_at: null }));
+            } else {
+                alert(json.error || 'Failed to dismiss flag');
+            }
+        } catch (err) {
+            alert('Network error');
+        }
+    };
+
     return (
         <>
             <ViewPostPageHeader />
-            <div className="container mx-auto p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 ">
+            <div className="container mx-auto p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8">
                 {loading && <p>Loading post...</p>}
                 {error && <p className="text-red-600">{error}</p>}
                 {post && (
-                    <>
-                        <h1 className="text-3xl text-black font-bold mb-2">{post.title}</h1>
-                        <div className="flex items-center gap-4 mb-4">
-                            <span className="text-lg text-black">By {post.is_anonymous ? 'Anonymous' : (post.username || '')} | {formatTimeSince(post.created_at)}</span>
-                            <h4 className={`card-title text-sm text-black px-2 rounded-full inline-block ${topicColors[post.topic] || topicColors.Other}`}>{post.topic}</h4>
-                            <div className="flex items-center gap-2 ml-auto">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Main Content - Left Side (2/3 width on desktop) */}
+                        <div className="lg:col-span-2">
+                            <h1 className="text-3xl text-black font-bold mb-2">{post.title}</h1>
+                            <div className="flex items-center gap-4 mb-4">
+                                <span className="text-lg text-black">By {post.is_anonymous ? 'Anonymous' : (post.username || '')} | {formatTimeSince(post.created_at)}</span>
+                                <h4 className={`card-title text-sm text-black px-2 rounded-full inline-block ${topicColors[post.topic] || topicColors.Other}`}>{post.topic}</h4>
+                                <div className="flex items-center gap-2 ml-auto">
                                                                 <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer">
                                                                         <motion.button
                                                                             aria-label={likes.liked_by_user ? 'Unlike' : 'Like'}
@@ -126,26 +168,83 @@ export default function ViewPostPage() {
                                                                                                                                                             <Heart size={20} className={likes.liked_by_user ? 'liked-heart' : ''} />
                                                                         </motion.button>
                                                                 </div>
-                                <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer">
+                                <div 
+                                    onClick={() => {
+                                        if (!user || !user.token) { alert('Please login to flag posts'); return; }
+                                        if (!confirm('Flag this post for review?')) return;
+                                        fetch(`${API_BASE}/posts/${id}/flag`, {
+                                            method: 'POST',
+                                            headers: { 'Authorization': `Bearer ${user.token}` }
+                                        })
+                                            .then(res => res.json())
+                                            .then(json => {
+                                                if (json.status === 'ok') {
+                                                    alert('Post flagged for review');
+                                                } else {
+                                                    alert(json.error || 'Failed to flag post');
+                                                }
+                                            })
+                                            .catch(() => alert('Network error'));
+                                    }}
+                                    className="rounded-full h-11 w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer"
+                                    aria-label="Flag post"
+                                >
                                     <Flag size={20} />
                                 </div>
                             </div>
+                            </div>
+                            <div className="h-0.5 w-full rounded bg-black/10 mb-4"></div>
+
+                            {/* Admin Controls */}
+                            {isAdmin && (
+                            <div className="mb-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <AlertTriangle className="h-5 w-5 text-blue-600" />
+                                    <h3 className="font-semibold text-blue-900">Admin Controls</h3>
+                                    {post.is_flagged && (
+                                        <span className="ml-auto px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                                            Flagged
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={handleDeletePost}
+                                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 text-sm font-medium"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                        Delete Post
+                                    </button>
+                                    {post.is_flagged && (
+                                        <button
+                                            onClick={handleDismissFlag}
+                                            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2 text-sm font-medium"
+                                        >
+                                            <XCircle className="h-4 w-4" />
+                                            Dismiss Flag
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                            <div className="text-lg text-black leading-relaxed max-w-prose">
+                                {post.content.split('\n').map((line, idx) => (
+                                    <React.Fragment key={idx}>
+                                        {line}
+                                        <br />
+                                    </React.Fragment>
+                                ))}
+                            </div>
                         </div>
-                        <div className="h-0.5 w-full rounded bg-black/10 mb-4"></div>
-                                                <div className="text-lg text-black">
-                                                    {post.content.split('\n').map((line, idx) => (
-                                                        <React.Fragment key={idx}>
-                                                            {line}
-                                                            <br />
-                                                        </React.Fragment>
-                                                    ))}
-                                                </div>
-                    </>
+
+                        {/* Comment Section - Right Side (1/3 width on desktop) */}
+                        <div className="lg:col-span-1">
+                            <CommentSection postId={id} />
+                        </div>
+                    </div>
                 )}
-
-                <CommentSection postId={id} />
             </div>
-
         </>
     );
 }

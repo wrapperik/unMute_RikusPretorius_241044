@@ -243,5 +243,36 @@ input:focus-visible {
   outline: none;
   box-shadow: none;
   border-color: #d1d5db; /* Tailwind gray-300 */
-/* } */ 
 
+
+/* Pinterest-style Masonry Grid */
+.masonry-grid {
+  column-count: auto;
+  column-width: 300px;
+  column-gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .masonry-grid {
+    column-width: 100%;
+    column-count: 1;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .masonry-grid {
+    column-count: 2;
+  }
+}
+
+/* Smooth masonry item behavior */
+.masonry-grid > div {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
+
+/* Enhanced hover effect for cards in masonry */
+.masonry-grid .group:hover {
+  z-index: 10;
+}

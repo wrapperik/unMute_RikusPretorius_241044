@@ -117,7 +117,7 @@ export default function JournalPage() {
       <JournalPageHeader />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-col lg:flex-row gap-12">
         <aside className="text-black w-full lg:w-1/3 lg:sticky top-28 self-start bg-white rounded-2xl" aria-label="Filter posts by mood">
-          <h1 className="text-xl font-bold mb-4">Browse by Mood</h1>
+          <h1 className="text-xl font-bold mb-4 hidden md:block">Browse by Mood</h1>
           <div className="text-black flex">
             {/* Mood selector chips */}
             {(() => {
@@ -140,26 +140,26 @@ export default function JournalPage() {
               ];
 
               return (
-                <ul className="space-y-2 w-full" role="list">
+                <ul className="space-y-2 w-full md:space-y-2 flex md:flex-col overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 gap-2 md:gap-0" role="list">
                   {moodOptions.map(m => {
                     const count = m.key === 'All' ? posts.filter(p => p.__type === 'journal').length : (moodCounts[m.key] || 0);
                     const isActive = selectedMood === m.key || (selectedMood === 'All' && m.key === 'All');
                     return (
-                      <li key={m.key}>
+                      <li key={m.key} className="flex-shrink-0 md:flex-shrink">
                         <div
                           role="button"
                           tabIndex={0}
                           aria-pressed={isActive}
                           onClick={() => setSelectedMood(m.key)}
                           onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setSelectedMood(m.key)}
-                          className={`flex w-50 p-2 rounded-xl cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black ${
+                          className={`flex items-center whitespace-nowrap px-3 md:px-2 py-2 md:py-2 rounded-xl cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black text-sm md:text-sm ${
                             isActive 
                               ? 'bg-black text-white shadow-sm' 
                               : 'bg-white hover:bg-gray-100 border-2 border-gray-200 hover:border-black'
                           }`}
                         >
-                          <h2 className="flex-start font-medium text-sm">{m.label}</h2>
-                          <h2 className={`ml-auto px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          <h2 className="font-medium text-xs md:text-sm">{m.label}</h2>
+                          <h2 className={`ml-2 md:ml-auto px-1.5 md:px-2 py-0.5 rounded-full text-xs font-semibold ${
                             isActive ? 'bg-white text-black' : 'bg-black text-white'
                           }`}>{count}</h2>
                         </div>

@@ -327,6 +327,27 @@ router.post('/:postId/comments/:commentId/flag', async (req, res) => {
   }
 });
 
+// POST /posts/:id/flag - flag a post for moderation
+// Requires auth. Sets is_flagged = 1 and records flagged_at timestamp.
+router.post('/:id/flag', async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const payload = getPayloadFromReq(req);
+    const userId = payload && (payload.id || payload.user_id || payload.userId) ? (payload.id || payload.user_id || payload.userId) : null;
+
+    if (!userId) return res.status(401).json({ status: 'error', error: 'Unauthorized' });
+
+    const [rows] = await pool.query('SELECT post_id FROM PublicPosts WHERE post_id = ? LIMIT 1', [postId]);
+    if (rows.length === 0) return res.status(404).json({ status: 'error', error: 'Post not found' });
+
+    await pool.query('UPDATE PublicPosts SET is_flagged = 1, flagged_at = NOW() WHERE post_id = ?', [postId]);
+    res.json({ status: 'ok', message: 'Post flagged' });
+  } catch (err) {
+    console.error('POST /posts/:id/flag error:', err);
+    res.status(500).json({ status: 'error', error: err.message });
+  }
+});
+
 router.delete('/:id', async (req, res) => {
   try {
     const postId = req.params.id;

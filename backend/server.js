@@ -14,6 +14,7 @@ import postsRoutes from "./routes/posts.js";
 import resourcesRoutes from "./routes/resources.js";
 import journalRoutes from "./routes/journal.js";
 import moodCheckinsRoutes from "./routes/moodcheckins.js";
+import adminRoutes from "./routes/admin.js";
 import { testConnection } from "./db.js";
 import path from "path";
 
@@ -41,6 +42,8 @@ app.use("/journal", journalRoutes);
 app.use("/addentry", journalRoutes);
 // Mood check-ins (POST creating check-ins tied to journal entries)
 app.use("/moodcheckins", moodCheckinsRoutes);
+// Admin endpoints (flagged content management) - admin only
+app.use("/admin", adminRoutes);
 
 // Example route
 app.get("/", (req, res) => {
