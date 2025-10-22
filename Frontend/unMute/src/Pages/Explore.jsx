@@ -147,7 +147,7 @@ export default function Explore() {
         {/* Filtering System */}
         <aside className="text-black w-full lg:w-72 lg:sticky top-28 self-start rounded-2xl lg:rounded-2xl md:rounded-2xl" aria-label="Filter posts by topic">
           <h1 className="text-xl font-bold mb-4 flex items-center gap-2 hidden md:flex">
-            🎯 Browse Topics
+            Browse Topics
           </h1>
           <div className="text-black flex md:flex">
             <ul className="space-y-2 w-full md:space-y-2 flex md:flex-col overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 gap-2 md:gap-0" role="list">
