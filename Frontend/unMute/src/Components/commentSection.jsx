@@ -210,7 +210,7 @@ const CommentSection = ({ postId }) => {
                                                 <span className="text-xs text-gray-500">
                                                     {formatCommentDate(comment.created_at)}
                                                 </span>
-                                                {!!comment.is_flagged && (
+                                                {comment.is_flagged && (
                                                     <span className="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full font-medium flex items-center gap-1">
                                                         <AlertTriangle size={10} />
                                                         Flagged
