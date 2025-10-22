@@ -26,6 +26,18 @@ app.use(cors());
 // Parse JSON bodies on all incoming requests
 app.use(express.json());
 
+// Support frontend using `/api/...` paths by removing the `/api` prefix.
+// Some frontend calls use `/api/auth/login` etc. The backend routes are
+// mounted at `/auth`, `/posts` etc. Stripping `/api` here keeps the
+// frontend code unchanged while making the paths match the server routes.
+app.use((req, res, next) => {
+  if (req.path && req.path.startsWith('/api/')) {
+    // rewrite url so downstream routers see the path without /api
+    req.url = req.url.replace(/^\/api/, '');
+  }
+  next();
+});
+
 // Test the pooled connection once at startup
 testConnection();
 
