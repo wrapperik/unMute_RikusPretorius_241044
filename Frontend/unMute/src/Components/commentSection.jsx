@@ -219,7 +219,7 @@ const CommentSection = ({ postId }) => {
                                             </div>
                                             
                                             {/* Admin Controls for Flagged Comments */}
-                                            {!!isAdmin && comment.is_flagged && (
+                                            {isAdmin && !!comment.is_flagged && (
                                                 <div className="mt-3 pt-3 border-t border-red-200 flex gap-2">
                                                     <button
                                                         onClick={() => handleDismissCommentFlag(comment.comment_id)}
