@@ -55,16 +55,18 @@ if (process.env.NODE_ENV === "production") {
   const staticPath = path.join(process.cwd(), "Frontend", "unMute", "dist");
   app.use(express.static(staticPath));
 
-  // Return index.html for any other route so client-side routing works
-  // Using a wildcard parameter instead of * to avoid path-to-regexp issues
-  app.get("*", (req, res) => {
-    // Only serve index.html for non-API routes (routes that don't start with /auth, /posts, etc.)
-    if (!req.path.startsWith('/auth') && !req.path.startsWith('/posts') && 
-        !req.path.startsWith('/resources') && !req.path.startsWith('/journal') && 
-        !req.path.startsWith('/addentry') && !req.path.startsWith('/moodcheckins') && 
-        !req.path.startsWith('/admin')) {
-      res.sendFile(path.join(staticPath, "index.html"));
+  // SPA fallback: return index.html for any request that doesn't match an API route
+  // This allows client-side routing to work (React Router, etc.)
+  app.use((req, res, next) => {
+    // Check if it's an API route
+    if (req.path.startsWith('/auth') || req.path.startsWith('/posts') || 
+        req.path.startsWith('/resources') || req.path.startsWith('/journal') || 
+        req.path.startsWith('/addentry') || req.path.startsWith('/moodcheckins') || 
+        req.path.startsWith('/admin')) {
+      return next(); // Let API routes pass through
     }
+    // Serve index.html for all other routes (SPA fallback)
+    res.sendFile(path.join(staticPath, "index.html"));
   });
 }
 
