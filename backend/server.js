@@ -56,10 +56,15 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static(staticPath));
 
   // Return index.html for any other route so client-side routing works
-  // Use `/*` instead of `*` to avoid a PathError with certain versions
-  // of path-to-regexp/router used by Express in the deployed environment.
-  app.get("/*", (req, res) => {
-    res.sendFile(path.join(staticPath, "index.html"));
+  // Using a wildcard parameter instead of * to avoid path-to-regexp issues
+  app.get("*", (req, res) => {
+    // Only serve index.html for non-API routes (routes that don't start with /auth, /posts, etc.)
+    if (!req.path.startsWith('/auth') && !req.path.startsWith('/posts') && 
+        !req.path.startsWith('/resources') && !req.path.startsWith('/journal') && 
+        !req.path.startsWith('/addentry') && !req.path.startsWith('/moodcheckins') && 
+        !req.path.startsWith('/admin')) {
+      res.sendFile(path.join(staticPath, "index.html"));
+    }
   });
 }
 
