@@ -45,11 +45,6 @@ app.use("/moodcheckins", moodCheckinsRoutes);
 // Admin endpoints (flagged content management) - admin only
 app.use("/admin", adminRoutes);
 
-// Example route
-app.get("/", (req, res) => {
-  res.json({ message: "Backend is running 🚀" });
-});
-
 // In production, serve the built frontend from the Vite build output
 if (process.env.NODE_ENV === "production") {
   const staticPath = path.join(process.cwd(), "Frontend", "unMute", "dist");
@@ -67,6 +62,11 @@ if (process.env.NODE_ENV === "production") {
     }
     // Serve index.html for all other routes (SPA fallback)
     res.sendFile(path.join(staticPath, "index.html"));
+  });
+} else {
+  // Development mode: show a simple API status message
+  app.get("/", (req, res) => {
+    res.json({ message: "Backend is running 🚀 (Development mode)" });
   });
 }
 
