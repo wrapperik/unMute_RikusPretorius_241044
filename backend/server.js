@@ -56,7 +56,9 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static(staticPath));
 
   // Return index.html for any other route so client-side routing works
-  app.get("*", (req, res) => {
+  // Use `/*` instead of `*` to avoid a PathError with certain versions
+  // of path-to-regexp/router used by Express in the deployed environment.
+  app.get("/*", (req, res) => {
     res.sendFile(path.join(staticPath, "index.html"));
   });
 }
