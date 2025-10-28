@@ -54,10 +54,18 @@ export default function Explore() {
   const [selectedTopic, setSelectedTopic] = useState('All');
   const [isFiltering, setIsFiltering] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('recent'); // 'recent', 'trending', 'top'
+  const [sortBy, setSortBy] = useState('recent'); // 'recent', 'top'
   
   const handleDeletePost = (postId) => {
     setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+  };
+
+  const handleLikesUpdate = (postId, newLikes) => {
+    setPosts(prevPosts => 
+      prevPosts.map(post => 
+        post.id === postId ? { ...post, likes: newLikes } : post
+      )
+    );
   };
 
   const handleTopicChange = (topic) => {
@@ -108,6 +116,27 @@ export default function Explore() {
         });
 
         setPosts(mapped);
+
+        // Load likes for all posts
+        Promise.all(
+          mapped.map(post => 
+            fetch(`${API_BASE}/posts/${post.id}/likes`)
+              .then(res => res.json())
+              .then(json => ({
+                postId: post.id,
+                likes: json.status === 'ok' && json.data ? json.data : { count: 0, liked_by_user: false }
+              }))
+              .catch(() => ({ postId: post.id, likes: { count: 0, liked_by_user: false } }))
+          )
+        ).then(likesData => {
+          if (!mounted) return;
+          setPosts(prevPosts => 
+            prevPosts.map(post => {
+              const postLikes = likesData.find(l => l.postId === post.id);
+              return postLikes ? { ...post, likes: postLikes.likes } : post;
+            })
+          );
+        });
       })
       .catch(err => {
         console.error('Failed to load posts:', err);
@@ -193,9 +222,7 @@ export default function Explore() {
   }
 
   // Sort posts
-  if (sortBy === 'trending') {
-    filteredPosts = [...filteredPosts].sort((a, b) => (b.likes?.count || 0) - (a.likes?.count || 0));
-  } else if (sortBy === 'top') {
+  if (sortBy === 'top') {
     filteredPosts = [...filteredPosts].sort((a, b) => (b.likes?.count || 0) - (a.likes?.count || 0));
   }
   // 'recent' is default order from API
@@ -306,7 +333,7 @@ export default function Explore() {
         </aside>
 
         {/* Main Feed */}
-        <section className="flex-1 max-w-2xl mx-auto w-full">
+        <section className="flex-1 max-w-2xl ml-auto w-full">
           {/* Sort Controls */}
           <div className="bg-white border border-gray-200 rounded-xl p-3 mb-4 shadow-sm">
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
@@ -322,17 +349,6 @@ export default function Explore() {
                 Recent
               </button>
               <button
-                onClick={() => setSortBy('trending')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                  sortBy === 'trending' 
-                    ? 'bg-[#004643] text-white' 
-                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <TrendingUp size={16} />
-                Trending
-              </button>
-              <button
                 onClick={() => setSortBy('top')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                   sortBy === 'top' 
@@ -341,7 +357,7 @@ export default function Explore() {
                 }`}
               >
                 <Sparkles size={16} />
-                Top
+                Top Liked
               </button>
             </div>
           </div>
@@ -377,7 +393,7 @@ export default function Explore() {
                       layout: { duration: 0.3 }
                     }}
                   >
-                    <PostCard post={post} onDelete={handleDeletePost} />
+                    <PostCard post={post} onDelete={handleDeletePost} onLikesUpdate={handleLikesUpdate} />
                   </motion.div>
                 ))}
               </AnimatePresence>

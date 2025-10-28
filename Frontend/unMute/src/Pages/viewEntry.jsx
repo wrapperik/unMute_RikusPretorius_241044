@@ -1,12 +1,27 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import ViewPostPageHeader from '../Components/viewPostPageHeader';
 import { motion } from 'framer-motion';
-import { Heart } from 'lucide-react'
-import { Flag } from 'lucide-react'
+import { Eye, Trash2, MoreHorizontal } from 'lucide-react'
 import { AuthContext } from '../context/AuthContext';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5050';
+
+const moodColors = {
+    excited: 'bg-orange-100 text-orange-700 border-orange-200',
+    happy: 'bg-green-100 text-green-700 border-green-200',
+    indifferent: 'bg-gray-100 text-gray-700 border-gray-200',
+    sad: 'bg-blue-100 text-blue-700 border-blue-200',
+    frustrated: 'bg-red-100 text-red-700 border-red-200'
+};
+
+const moodGradients = {
+    excited: 'from-orange-400 to-orange-600',
+    happy: 'from-green-400 to-emerald-600',
+    indifferent: 'from-gray-400 to-gray-600',
+    sad: 'from-blue-400 to-blue-600',
+    frustrated: 'from-red-400 to-red-600'
+};
 
 function formatTimeSince(dateString) {
     if (!dateString) return '';
@@ -26,12 +41,13 @@ function formatTimeSince(dateString) {
 export default function ViewEntryPage() {
     const { id } = useParams();
     const { state } = useLocation();
+    const navigate = useNavigate();
     const entryTitle = state && state.entryTitle;
     const [entry, setEntry] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showActions, setShowActions] = useState(false);
     const { user } = useContext(AuthContext);
-    const [likes, setLikes] = useState({ count: 0, liked_by_user: false });
 
     useEffect(() => {
         let mounted = true;
@@ -56,63 +72,136 @@ export default function ViewEntryPage() {
         return () => { mounted = false; };
     }, [id, user]);
 
+    const handleDelete = async () => {
+        if (!window.confirm('Are you sure you want to permanently delete this journal entry? This action cannot be undone.')) return;
+        try {
+            const res = await fetch(`${API_BASE}/journal/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            const json = await res.json();
+            if (json.status === 'ok') {
+                navigate('/journal');
+            } else {
+                alert(json.error || 'Failed to delete entry');
+            }
+        } catch (err) {
+            alert('Network error');
+        }
+    };
+
+    // Share capability removed per request
+
+    const canDelete = entry && user && (user.id === entry.user_id || user.is_admin);
+    const moodForEntry = entry?.mood || entry?.mood_label || 'indifferent';
+
     return (
         <>
             <ViewPostPageHeader />
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {loading && <p>Loading entry...</p>}
-                {error && <p className="text-red-600">{error}</p>}
-                {entry && (
-                    <>
-                        <h1 className="text-3xl text-black font-bold mb-2">{entry.title || `Entry ${entry.entry_id}`}</h1>
-                        <div className="flex items-center gap-4 mb-4">
-                            <span className="text-lg text-black">By {
-                                entry.username ? entry.username
-                                : (user && user.id === entry.user_id ? (user.username || 'You')
-                                : (entry.user_id ? `User ${entry.user_id}` : 'Unknown'))
-                            } | {formatTimeSince(entry.created_at)}</span>
-                            <div className="flex items-center gap-2 ml-auto">
-                                {/* Show delete button if the logged-in user owns the entry or is admin */}
-                                {(user && (user.id === entry.user_id || user.is_admin)) && (
-                                    <button
-                                        onClick={async (e) => {
-                                            e.stopPropagation();
-                                            if (!window.confirm('Permanently delete this entry?')) return;
-                                            try {
-                                                const res = await fetch(`${API_BASE}/journal/${id}`, {
-                                                    method: 'DELETE',
-                                                    headers: { Authorization: `Bearer ${user.token}` }
-                                                });
-                                                const json = await res.json();
-                                                if (json.status === 'ok') {
-                                                    // navigate back to journal listing
-                                                    window.location.href = '/journal';
-                                                } else {
-                                                    alert(json.error || 'Failed to delete entry');
-                                                }
-                                            } catch (err) {
-                                                alert('Network error');
-                                            }
-                                        }}
-                                        className="rounded-full h-11 w-11 bg-white text-red-600 items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer"
-                                        title="Delete entry"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-trash-2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m5 0V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/></svg>
-                                    </button>
-                                )}
+            <div className="min-h-screen bg-gray-50 py-8">
+                <div className="max-w-2xl ml-auto mr-8 px-4">
+                    {loading && (
+                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+                            <div className="animate-pulse space-y-4">
+                                <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+                                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                <div className="h-32 bg-gray-200 rounded"></div>
                             </div>
                         </div>
-                        <div className="h-0.5 w-full rounded bg-black/10 mb-4"></div>
-                        <div className="text-lg text-black">
-                            {entry.content && entry.content.split('\n').map((line, idx) => (
-                                <React.Fragment key={idx}>
-                                    {line}
-                                    <br />
-                                </React.Fragment>
-                            ))}
+                    )}
+                    
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700">
+                            {error}
                         </div>
-                    </>
-                )}
+                    )}
+                    
+                    {entry && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="space-y-4"
+                        >
+                            {/* Main Entry Card */}
+                            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                                {/* Header */}
+                                <div className="px-4 pt-4 pb-3">
+                                    <div className="flex gap-3">
+                                        {/* Avatar with mood gradient */}
+                                        <div className={`flex-shrink-0 w-11 h-11 rounded-full bg-gradient-to-br ${moodGradients[moodForEntry] || moodGradients.indifferent} flex items-center justify-center text-white font-bold text-sm shadow-md`}>
+                                            {(entry.username || 'U')[0].toUpperCase()}
+                                        </div>
+                                        
+                                        {/* User Info */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="font-bold text-sm text-gray-900 truncate">
+                                                            {entry.username || (user && user.id === entry.user_id ? (user.username || 'You') : `User ${entry.user_id || 'Unknown'}`)}
+                                                        </span>
+                                                        <span className="text-gray-400 text-xs">·</span>
+                                                        <span className="text-gray-500 text-xs">{formatTimeSince(entry.created_at)}</span>
+                                                    </div>
+                                                    <span className={`inline-block mt-1.5 text-xs px-2.5 py-1 rounded-full font-semibold capitalize border ${moodColors[moodForEntry] || moodColors.indifferent}`}>
+                                                        {moodForEntry}
+                                                    </span>
+                                                </div>
+                                                {canDelete && (
+                                                    <button
+                                                        onClick={() => setShowActions(!showActions)}
+                                                        className="flex-shrink-0 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                                                        aria-label="More options"
+                                                    >
+                                                        <MoreHorizontal size={16} className="text-gray-500" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Entry Title & Content */}
+                                <div className="px-4 pb-4">
+                                    <h1 className="text-xl font-bold text-gray-900 mb-3 leading-tight">
+                                        {entry.title || `Entry ${entry.entry_id}`}
+                                    </h1>
+                                    <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                        {entry.content}
+                                    </div>
+                                </div>
+
+                                {/* Privacy Indicator */}
+                                <div className="px-4 py-3 border-t border-gray-100">
+                                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                                        <Eye size={14} />
+                                        <span className="font-medium">Private Journal Entry</span>
+                                    </div>
+                                </div>
+
+                                {/* Action buttons removed (share capability disabled) */}
+                            </div>
+                            
+                            {/* More Actions Dropdown - positioned outside card */}
+                            {showActions && canDelete && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                    className="absolute right-4 top-14 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-20 min-w-[160px]"
+                                >
+                                    <button
+                                        onClick={handleDelete}
+                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                    >
+                                        <Trash2 size={16} />
+                                        Delete Entry
+                                    </button>
+                                </motion.div>
+                            )}
+                        </motion.div>
+                    )}
+                </div>
             </div>
         </>
     );

@@ -3,12 +3,28 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import ViewPostPageHeader from '../Components/viewPostPageHeader';
 import CommentSection from '../Components/commentSection';
 import { motion } from 'framer-motion';
-import { Heart, Trash2, XCircle, AlertTriangle } from 'lucide-react'
-import { MessageCircle } from 'lucide-react'
-import { Flag } from 'lucide-react'
+import { Heart, Trash2, XCircle, AlertTriangle, MessageCircle, Flag, Share2, MoreHorizontal } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5050';
+
+const topicColors = {
+    Joy: 'bg-yellow-100 border border-yellow-300 text-yellow-900',
+    Stress: 'bg-red-100 border border-red-300 text-red-900',
+    Anxiety: 'bg-blue-100 border border-blue-300 text-blue-900',
+    Depression: 'bg-purple-100 border border-purple-300 text-purple-900',
+    Motivation: 'bg-green-100 border border-green-300 text-green-900',
+    Other: 'bg-gray-100 border border-gray-300 text-gray-900',
+};
+
+const topicGradients = {
+    Joy: 'from-yellow-400 to-orange-400',
+    Stress: 'from-red-400 to-pink-500',
+    Anxiety: 'from-blue-400 to-cyan-500',
+    Depression: 'from-purple-400 to-indigo-500',
+    Motivation: 'from-green-400 to-emerald-500',
+    Other: 'from-gray-400 to-slate-500',
+};
 
 // Helper to format time since post creation
 function formatTimeSince(dateString) {
@@ -27,14 +43,6 @@ function formatTimeSince(dateString) {
 }
 
 export default function ViewPostPage() {
-    const topicColors = {
-        Joy: 'bg-yellow-50 border-2 border-yellow-200',
-        Stress: 'bg-red-50 border-2 border-red-200',
-        Anxiety: 'bg-blue-50 border-2 border-blue-200',
-        Depression: 'bg-purple-50 border-2 border-purple-200',
-        Motivation: 'bg-green-50 border-2 border-green-200',
-        Other: 'bg-gray-50 border-2 border-gray-200',
-    };
     const { id } = useParams();
     const { state } = useLocation();
     const navigate = useNavigate();
@@ -42,6 +50,8 @@ export default function ViewPostPage() {
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showActions, setShowActions] = useState(false);
+    const [commentsCount, setCommentsCount] = useState(0);
     const { user } = useContext(AuthContext);
     const [likes, setLikes] = useState({ count: 0, liked_by_user: false });
     const isAdmin = user && (user.is_admin || user.isAdmin);
@@ -85,6 +95,21 @@ export default function ViewPostPage() {
             return () => { mounted = false; };
         }, [id, user]);
 
+    // Load comments count
+    useEffect(() => {
+        let mounted = true;
+        fetch(`${API_BASE}/posts/${id}/comments`)
+            .then(res => res.json())
+            .then(json => {
+                if (!mounted) return;
+                if (json.status === 'ok' && json.data) {
+                    setCommentsCount(json.data.length);
+                }
+            })
+            .catch(() => {});
+        return () => { mounted = false; };
+    }, [id]);
+
     const handleDeletePost = async () => {
         if (!confirm('Delete this post permanently? This action cannot be undone.')) return;
         try {
@@ -123,124 +148,249 @@ export default function ViewPostPage() {
         }
     };
 
+    const handleLike = async () => {
+        if (!user || !user.token) { 
+            navigate('/login'); 
+            return; 
+        }
+        
+        const prev = { ...likes };
+        const newLiked = !likes.liked_by_user;
+        const newLikes = { count: newLiked ? likes.count + 1 : Math.max(0, likes.count - 1), liked_by_user: newLiked };
+        setLikes(newLikes);
+        
+        try {
+            const res = await fetch(`${API_BASE}/posts/${id}/like`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${user.token}` }
+            });
+            const json = await res.json();
+            if (!json || json.status !== 'ok') {
+                setLikes(prev);
+            }
+        } catch (err) {
+            setLikes(prev);
+        }
+    };
+
+    const handleFlag = async () => {
+        if (!user || !user.token) { 
+            alert('Please login to flag posts'); 
+            return; 
+        }
+        if (!confirm('Flag this post for review?')) return;
+        
+        try {
+            const res = await fetch(`${API_BASE}/posts/${id}/flag`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${user.token}` }
+            });
+            const json = await res.json();
+            if (json.status === 'ok') {
+                alert('Post flagged for review');
+            } else {
+                alert(json.error || 'Failed to flag post');
+            }
+        } catch (err) {
+            alert('Network error');
+        }
+    };
+
+    const handleShare = () => {
+        const url = window.location.href;
+        if (navigator.share) {
+            navigator.share({
+                title: post?.title || 'Post',
+                text: post?.content?.slice(0, 100) + '...' || '',
+                url: url
+            }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(url);
+            alert('Link copied to clipboard!');
+        }
+    };
+
     return (
         <>
             <ViewPostPageHeader />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {loading && <p>Loading post...</p>}
-                {error && <p className="text-red-600">{error}</p>}
+                {loading && (
+                    <div className="flex items-center justify-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#004643]"></div>
+                    </div>
+                )}
+                
+                {error && (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                        <p className="text-red-600 font-medium">{error}</p>
+                    </div>
+                )}
+                
                 {post && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Main Content - Left Side (2/3 width on desktop) */}
                         <div className="lg:col-span-2">
-                            <h1 className="text-3xl text-black font-bold mb-2">{post.title}</h1>
-                            <div className="flex items-center gap-4 mb-4">
-                                <span className="text-lg text-black">By {post.is_anonymous ? 'Anonymous' : (post.username || '')} | {formatTimeSince(post.created_at)}</span>
-                                <h4 className={`card-title text-sm text-black px-2 rounded-full inline-block ${topicColors[post.topic] || topicColors.Other}`}>{post.topic}</h4>
-                                <div className="flex items-center gap-2 ml-auto">
-                                                                <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer">
-                                                                        <motion.button
-                                                                            aria-label={likes.liked_by_user ? 'Unlike' : 'Like'}
-                                                                            onClick={() => {
-                                                                                if (!user || !user.token) return; // optionally redirect to login
-                                                                                const prev = { ...likes };
-                                                                                const newLiked = !likes.liked_by_user;
-                                                                                setLikes({ count: newLiked ? likes.count + 1 : Math.max(0, likes.count - 1), liked_by_user: newLiked });
-                                                                                        console.log('Calling POST /posts/' + id + '/like');
-                                                                                        fetch(`${API_BASE}/posts/${id}/like`, {
-                                                                                            method: 'POST',
-                                                                                            headers: { Authorization: `Bearer ${user.token}` }
-                                                                                        })
-                                                                                            .then(async res => {
-                                                                                                const body = await res.text();
-                                                                                                let json;
-                                                                                                try { json = JSON.parse(body); } catch(e) { json = body; }
-                                                                                                console.log('Response:', res.status, json);
-                                                                                                if (!json || json.status !== 'ok') setLikes(prev);
-                                                                                            })
-                                                                                            .catch(err => { console.error('Network error liking post:', err); setLikes(prev); });
-                                                                            }}
-                                                                            initial={false}
-                                                                            animate={likes.liked_by_user ? { scale: 1.12 } : { scale: 1 }}
-                                                                            transition={{ type: 'spring', stiffness: 500, damping: 20 }}
-                                                                            whileTap={{ scale: 0.95 }}
-                                                                        >
-                                                                                                                                                            <Heart size={20} className={likes.liked_by_user ? 'liked-heart' : ''} />
-                                                                        </motion.button>
-                                                                </div>
-                                <div 
-                                    onClick={() => {
-                                        if (!user || !user.token) { alert('Please login to flag posts'); return; }
-                                        if (!confirm('Flag this post for review?')) return;
-                                        fetch(`${API_BASE}/posts/${id}/flag`, {
-                                            method: 'POST',
-                                            headers: { 'Authorization': `Bearer ${user.token}` }
-                                        })
-                                            .then(res => res.json())
-                                            .then(json => {
-                                                if (json.status === 'ok') {
-                                                    alert('Post flagged for review');
-                                                } else {
-                                                    alert(json.error || 'Failed to flag post');
-                                                }
-                                            })
-                                            .catch(() => alert('Network error'));
-                                    }}
-                                    className="rounded-full h-11 w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer"
-                                    aria-label="Flag post"
+                            {/* Admin Controls Banner */}
+                            {isAdmin && post.is_flagged && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="mb-4 p-4 bg-red-50 border-2 border-red-200 rounded-xl"
                                 >
-                                    <Flag size={20} />
-                                </div>
-                            </div>
-                            </div>
-                            <div className="h-0.5 w-full rounded bg-black/10 mb-4"></div>
-
-                            {/* Admin Controls */}
-                            {isAdmin && (
-                            <div className="mb-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <AlertTriangle className="h-5 w-5 text-blue-600" />
-                                    <h3 className="font-semibold text-blue-900">Admin Controls</h3>
-                                    {post.is_flagged && (
-                                        <span className="ml-auto px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
-                                            Flagged
+                                    <div className="flex items-center gap-2">
+                                        <AlertTriangle className="h-5 w-5 text-red-600" />
+                                        <span className="font-semibold text-red-900">This post has been flagged</span>
+                                        <span className="ml-auto text-xs text-red-600">
+                                            {formatTimeSince(post.flagged_at)}
                                         </span>
-                                    )}
-                                </div>
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={handleDeletePost}
-                                        className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors flex items-center gap-2 text-sm font-medium"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                        Delete Post
-                                    </button>
-                                    {post.is_flagged && (
-                                        <button
-                                            onClick={handleDismissFlag}
-                                            className="px-4 py-2 bg-white border-2 border-[#004643] text-[#004643] rounded-xl hover:bg-[#004643] hover:text-white transition-colors flex items-center gap-2 text-sm font-medium"
-                                        >
-                                            <XCircle className="h-4 w-4" />
-                                            Dismiss Flag
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+                                    </div>
+                                </motion.div>
+                            )}
 
-                            <div className="text-lg text-black leading-relaxed max-w-prose">
-                                {post.content.split('\n').map((line, idx) => (
-                                    <React.Fragment key={idx}>
-                                        {line}
-                                        <br />
-                                    </React.Fragment>
-                                ))}
-                            </div>
+                            {/* Post Card */}
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="relative bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+                            >
+                                {/* Post Header */}
+                                <div className="px-6 pt-6 pb-4">
+                                    <div className="flex gap-3">
+                                        {/* Avatar with gradient based on topic */}
+                                        <div className={`flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br ${topicGradients[post.topic] || topicGradients.Other} flex items-center justify-center text-white font-bold text-lg shadow-md`}>
+                                            {(post.is_anonymous ? 'A' : (post.username || 'U')[0]).toUpperCase()}
+                                        </div>
+                                        
+                                        {/* User Info & Topic */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="font-bold text-base text-gray-900">
+                                                        {post.is_anonymous ? 'Anonymous' : (post.username || 'Unknown')}
+                                                    </span>
+                                                    <span className="text-gray-500 text-sm">{formatTimeSince(post.created_at)}</span>
+                                                </div>
+                                                <button
+                                                    onClick={() => setShowActions(!showActions)}
+                                                    className="flex-shrink-0 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                                                    aria-label="More options"
+                                                >
+                                                    <MoreHorizontal size={20} className="text-gray-500" />
+                                                </button>
+                                            </div>
+                                            <span className={`inline-block mt-2 text-xs px-3 py-1.5 rounded-full font-semibold ${topicColors[post.topic] || topicColors.Other}`}>
+                                                {post.topic}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Post Content */}
+                                <div className="px-6 pb-6">
+                                    <h1 className="text-2xl font-bold text-gray-900 leading-tight mb-4">{post.title}</h1>
+                                    <div className="text-base text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                        {post.content}
+                                    </div>
+                                </div>
+
+                                {/* Engagement Bar */}
+                                <div className="px-6 py-4 border-t border-gray-100">
+                                    <div className="flex items-center justify-between text-gray-500 text-sm">
+                                        <div className="flex items-center gap-6">
+                                            <span className="font-medium">
+                                                {likes.count} {likes.count === 1 ? 'like' : 'likes'}
+                                            </span>
+                                            <span className="font-medium">
+                                                {commentsCount} {commentsCount === 1 ? 'comment' : 'comments'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="px-4 py-3 border-t border-gray-100 flex items-center gap-2">
+                                    <motion.button
+                                        onClick={handleLike}
+                                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all ${
+                                            likes.liked_by_user 
+                                                ? 'text-red-600 bg-red-50 hover:bg-red-100' 
+                                                : 'text-gray-600 hover:bg-gray-100'
+                                        }`}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <Heart 
+                                            size={20} 
+                                            className={likes.liked_by_user ? 'fill-red-600' : ''} 
+                                        />
+                                        <span>Like</span>
+                                    </motion.button>
+
+                                    <motion.button
+                                        onClick={() => {
+                                            const el = document.getElementById('comment-section');
+                                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                        }}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm text-gray-600 hover:bg-gray-100 transition-all"
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <MessageCircle size={20} />
+                                        <span>Comment</span>
+                                    </motion.button>
+
+                                    <motion.button
+                                        onClick={handleShare}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm text-gray-600 hover:bg-gray-100 transition-all"
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <Share2 size={20} />
+                                        <span>Share</span>
+                                    </motion.button>
+                                </div>
+
+                                {/* More Actions Dropdown */}
+                                {showActions && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        className="absolute right-6 top-20 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-20 min-w-[160px]"
+                                    >
+                                        <button
+                                            onClick={handleFlag}
+                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                        >
+                                            <Flag size={16} />
+                                            Report Post
+                                        </button>
+                                        {isAdmin && (
+                                            <>
+                                                <button
+                                                    onClick={handleDeletePost}
+                                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-gray-100"
+                                                >
+                                                    <Trash2 size={16} />
+                                                    Delete Post
+                                                </button>
+                                                {post.is_flagged && (
+                                                    <button
+                                                        onClick={handleDismissFlag}
+                                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50 transition-colors border-t border-gray-100"
+                                                    >
+                                                        <XCircle size={16} />
+                                                        Dismiss Flag
+                                                    </button>
+                                                )}
+                                            </>
+                                        )}
+                                    </motion.div>
+                                )}
+                            </motion.div>
                         </div>
 
                         {/* Comment Section - Right Side (1/3 width on desktop) */}
                         <div className="lg:col-span-1">
-                            <CommentSection postId={id} />
+                            <div id="comment-section">
+                                <CommentSection postId={id} />
+                            </div>
                         </div>
                     </div>
                 )}
@@ -248,4 +398,3 @@ export default function ViewPostPage() {
         </>
     );
 }
-

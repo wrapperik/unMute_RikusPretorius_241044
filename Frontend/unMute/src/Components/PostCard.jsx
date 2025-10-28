@@ -24,7 +24,7 @@ const topicGradients = {
   Other: 'from-gray-400 to-slate-500',
 };
 
-export default function PostCard({ post, onDelete }) {
+export default function PostCard({ post, onDelete, onLikesUpdate }) {
   const { user } = useContext(AuthContext);
   const [showActions, setShowActions] = useState(false);
   const [likes, setLikes] = useState(post.likes || { count: 0, liked_by_user: false });
@@ -53,8 +53,14 @@ export default function PostCard({ post, onDelete }) {
     }
   };
 
-  // Load likes for this post when component mounts
+  // Load likes for this post when component mounts (only if not already loaded)
   useEffect(() => {
+    if (post.likes && post.likes.count > 0) {
+      // Likes already loaded from parent, just sync local state
+      setLikes(post.likes);
+      return;
+    }
+    
     let mounted = true;
     fetch(`${API_BASE}/posts/${post.id}/likes`, {
       headers: user && user.token ? { Authorization: `Bearer ${user.token}` } : {}
@@ -64,11 +70,14 @@ export default function PostCard({ post, onDelete }) {
         if (!mounted) return;
         if (json.status === 'ok' && json.data) {
           setLikes(json.data);
+          if (onLikesUpdate) {
+            onLikesUpdate(post.id, json.data);
+          }
         }
       })
       .catch(() => {})
     return () => { mounted = false; };
-  }, [post.id, user]);
+  }, [post.id, post.likes, user, onLikesUpdate]);
 
   // Load comments count
   useEffect(() => {
@@ -98,7 +107,13 @@ export default function PostCard({ post, onDelete }) {
     
     const prev = { ...likes };
     const newLiked = !likes.liked_by_user;
-    setLikes({ count: newLiked ? likes.count + 1 : Math.max(0, likes.count - 1), liked_by_user: newLiked });
+    const newLikes = { count: newLiked ? likes.count + 1 : Math.max(0, likes.count - 1), liked_by_user: newLiked };
+    setLikes(newLikes);
+    
+    // Update parent state immediately for sorting
+    if (onLikesUpdate) {
+      onLikesUpdate(post.id, newLikes);
+    }
     
     try {
       const res = await fetch(`${API_BASE}/posts/${post.id}/like`, {
@@ -108,9 +123,15 @@ export default function PostCard({ post, onDelete }) {
       const json = await res.json();
       if (!json || json.status !== 'ok') {
         setLikes(prev);
+        if (onLikesUpdate) {
+          onLikesUpdate(post.id, prev);
+        }
       }
     } catch (err) {
       setLikes(prev);
+      if (onLikesUpdate) {
+        onLikesUpdate(post.id, prev);
+      }
     }
   };
 
@@ -154,146 +175,130 @@ export default function PostCard({ post, onDelete }) {
   };
 
   return (
-    <motion.article 
-      className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 group"
+    <motion.div 
+      className="relative bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group"
       whileHover={{ y: -2 }}
-      onClick={handleClick}
+      onMouseEnter={() => setShowActions(true)}
+      onMouseLeave={() => setShowActions(false)}
     >
-      <div className="p-5">
-        {/* Header */}
-        <div className="flex items-start gap-3 mb-3">
-          {/* Avatar with gradient based on topic */}
-          <div className={`flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br ${topicGradients[post.topic] || topicGradients.Other} flex items-center justify-center text-white font-bold text-base shadow-md`}>
-            {(post.raw && post.raw.is_anonymous ? 'A' : (post.username || 'U')[0]).toUpperCase()}
-          </div>
-          
-          {/* User info and metadata */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 flex-wrap min-w-0">
-                <span className="font-bold text-gray-900 text-sm truncate">
-                  {post.raw && post.raw.is_anonymous ? 'Anonymous' : (post.username || 'Unknown')}
-                </span>
-                <span className="text-gray-400">·</span>
-                <span className="text-gray-500 text-sm flex-shrink-0">{post.time}</span>
-              </div>
-              
-              {/* More options button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowActions(!showActions);
-                }}
-                className="flex-shrink-0 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
-                aria-label="More options"
-              >
-                <MoreHorizontal size={18} className="text-gray-500" />
-              </button>
+      <div 
+        className="cursor-pointer" 
+        onClick={handleClick}
+      >
+        {/* Post Header */}
+        <div className="px-4 pt-4 pb-3">
+          <div className="flex gap-3">
+            {/* Avatar with gradient based on topic */}
+            <div className={`flex-shrink-0 w-11 h-11 rounded-full bg-gradient-to-br ${topicGradients[post.topic] || topicGradients.Other} flex items-center justify-center text-white font-bold text-sm shadow-md`}>
+              {(post.raw && post.raw.is_anonymous ? 'A' : (post.username || 'U')[0]).toUpperCase()}
             </div>
             
-            {/* Topic badge */}
-            <div className="mt-1">
-              <span className={`inline-block text-xs px-2.5 py-1 rounded-full font-semibold ${topicColors[post.topic] || topicColors.Other}`}>
+            {/* User Info & Topic */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                  <span className="font-bold text-sm text-gray-900 truncate">
+                    {post.raw && post.raw.is_anonymous ? 'Anonymous' : (post.username || 'Unknown')}
+                  </span>
+                  <span className="text-gray-400 text-xs">·</span>
+                  <span className="text-gray-500 text-xs">{post.time}</span>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowActions(!showActions);
+                  }}
+                  className="flex-shrink-0 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="More options"
+                >
+                  <MoreHorizontal size={16} className="text-gray-500" />
+                </button>
+              </div>
+              <span className={`inline-block mt-1.5 text-xs px-2.5 py-1 rounded-full font-semibold ${topicColors[post.topic] || topicColors.Other}`}>
                 {post.topic}
               </span>
             </div>
           </div>
         </div>
-        
-        {/* Content */}
-        <div className="space-y-2 mb-4 cursor-pointer">
-          <h2 className="font-bold text-lg text-gray-900 leading-tight hover:text-[#004643] transition-colors">
+
+        {/* Post Content */}
+        <div className="px-4 pb-3">
+          <h2 className="font-bold text-base text-gray-900 leading-tight mb-2">
             {post.title}
           </h2>
-          <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
+          <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
             {post.description}
           </p>
         </div>
-        
-        {/* Engagement bar */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-          {/* Left: Stats */}
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <button
-              onClick={handleLike}
-              className={`flex items-center gap-1.5 hover:text-red-500 transition-colors ${likes.liked_by_user ? 'text-red-500' : ''}`}
-            >
-              <motion.div
-                whileTap={{ scale: 1.3 }}
-                animate={likes.liked_by_user ? { scale: [1, 1.2, 1] } : {}}
-              >
-                <Heart 
-                  size={18} 
-                  className={likes.liked_by_user ? 'fill-red-500' : ''} 
-                />
-              </motion.div>
-              <span className="font-medium">{likes.count || 0}</span>
-            </button>
-            
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title, from: '/explore', scrollToComments: true } });
-              }}
-              className="flex items-center gap-1.5 hover:text-[#004643] transition-colors"
-            >
-              <MessageCircle size={18} />
-              <span className="font-medium">{commentsCount || 0}</span>
-            </button>
-          </div>
-          
-          {/* Right: Action buttons */}
-          <div className="flex items-center gap-2">
-            <motion.button
-              onClick={handleShare}
-              className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-[#004643] transition-colors"
-              whileTap={{ scale: 0.9 }}
-              aria-label="Share"
-            >
-              <Share2 size={16} />
-            </motion.button>
-            
-            <motion.button
-              onClick={handleFlag}
-              className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-orange-500 transition-colors"
-              whileTap={{ scale: 0.9 }}
-              aria-label="Report"
-            >
-              <Flag size={16} />
-            </motion.button>
-            
-            {canDelete && (
-              <motion.button
-                onClick={handleDelete}
-                className="p-2 rounded-full hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors"
-                whileTap={{ scale: 0.9 }}
-                aria-label="Delete"
-              >
-                <Trash2 size={16} />
-              </motion.button>
-            )}
+
+        {/* Engagement Bar */}
+        <div className="px-4 py-3 border-t border-gray-100">
+          <div className="flex items-center justify-between text-gray-500 text-xs">
+            <div className="flex items-center gap-4">
+              <span className="font-medium">
+                {likes.count} {likes.count === 1 ? 'like' : 'likes'}
+              </span>
+              <span className="font-medium">
+                {commentsCount} {commentsCount === 1 ? 'comment' : 'comments'}
+              </span>
+            </div>
+            <span className="text-gray-400 hidden sm:block">Click to read more</span>
           </div>
         </div>
+
+        {/* Action Buttons */}
+        <div className="px-2 py-2 border-t border-gray-100 flex items-center justify-between gap-1">
+          <motion.button
+            onClick={handleLike}
+            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg font-medium text-sm transition-all ${
+              likes.liked_by_user 
+                ? 'text-red-600 bg-red-50 hover:bg-red-100' 
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Heart 
+              size={18} 
+              className={likes.liked_by_user ? 'fill-red-600' : ''} 
+            />
+            <span className="hidden sm:inline">Like</span>
+          </motion.button>
+
+          <motion.button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title, from: '/explore', scrollToComments: true } });
+            }}
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg font-medium text-sm text-gray-600 hover:bg-gray-100 transition-all"
+            whileTap={{ scale: 0.95 }}
+          >
+            <MessageCircle size={18} />
+            <span className="hidden sm:inline">Comment</span>
+          </motion.button>
+
+          <motion.button
+            onClick={handleShare}
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg font-medium text-sm text-gray-600 hover:bg-gray-100 transition-all"
+            whileTap={{ scale: 0.95 }}
+          >
+            <Share2 size={18} />
+            <span className="hidden sm:inline">Share</span>
+          </motion.button>
+        </div>
       </div>
-      
-      {/* Actions dropdown */}
+
+      {/* More Actions Dropdown */}
       {showActions && (
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute right-4 top-16 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-10 min-w-[160px]"
+          initial={{ opacity: 0, scale: 0.95, y: -10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: -10 }}
+          className="absolute right-4 top-14 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-20 min-w-[160px]"
           onClick={(e) => e.stopPropagation()}
         >
           <button
-            onClick={handleShare}
-            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
-          >
-            <Share2 size={16} />
-            Share Post
-          </button>
-          <button
             onClick={handleFlag}
-            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-orange-600"
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
           >
             <Flag size={16} />
             Report Post
@@ -301,7 +306,7 @@ export default function PostCard({ post, onDelete }) {
           {canDelete && (
             <button
               onClick={handleDelete}
-              className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-red-600"
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-gray-100"
             >
               <Trash2 size={16} />
               Delete Post
@@ -309,6 +314,6 @@ export default function PostCard({ post, onDelete }) {
           )}
         </motion.div>
       )}
-    </motion.article>
+    </motion.div>
   );
 }
