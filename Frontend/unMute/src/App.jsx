@@ -13,6 +13,7 @@ import JournalPage from './Pages/journal.jsx'
 import AddResourcePage from './Pages/addResource.jsx'
 import AdminDashboard from './Pages/AdminDashboard.jsx'
 import About from './Pages/about.jsx'
+import Account from './Pages/Account.jsx'
 import Navbar from './Components/navbar.jsx'
 import PageLoader from './Components/PageLoader.jsx'
 import Footer from './Components/footer.jsx'
@@ -49,6 +50,7 @@ function App() {
           <Route path="/journal" element={<JournalPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/about" element={<About />} />
+          <Route path="/account" element={<Account />} />
         </Routes>
       </PageLoader>
       <Footer />

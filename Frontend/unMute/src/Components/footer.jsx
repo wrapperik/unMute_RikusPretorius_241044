@@ -1,25 +1,25 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 export default function Footer() {
   return (
     <footer className="bg-[#004643] text-white mt-20 p-10 border-t border-gray-200">
   <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center gap-6">
         <nav className="flex-1 text-center sm:text-left">
-          <h6 className="footer-title">Features</h6>
-          <a className="link link-hover block">Explore</a>
-          <a className="link link-hover block">Journal</a>
-          <a className="link link-hover block">Resources</a>
-          <a className="link link-hover block">Account</a>
+          <h6 className="footer-title font-semibold text-lg mb-3">Features</h6>
+          <Link to="/explore" className="link link-hover block mb-2 hover:underline transition-all">Explore</Link>
+          <Link to="/journal" className="link link-hover block mb-2 hover:underline transition-all">Journal</Link>
+          <Link to="/resources" className="link link-hover block mb-2 hover:underline transition-all">Resources</Link>
+          <Link to="/account" className="link link-hover block mb-2 hover:underline transition-all">Account</Link>
         </nav>
 
         <nav className="flex-1 text-center sm:text-left">
-          <h6 className="footer-title">Company</h6>
-          <a className="link link-hover block">About us</a>
-          <a className="link link-hover block">Contact</a>
+          <h6 className="footer-title font-semibold text-lg mb-3">Company</h6>
+          <Link to="/about" className="link link-hover block mb-2 hover:underline transition-all">About us</Link>
         </nav>
 
         <nav className="flex-1 text-center sm:text-right">
-          <h6 className="footer-title">Social</h6>
+          <h6 className="footer-title font-semibold text-lg mb-3">Social</h6>
           <div className="grid grid-flow-col gap-4 justify-center sm:justify-end">
             <a aria-label="Twitter" className="hover:opacity-80">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="fill-current">

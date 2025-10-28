@@ -1,11 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Compass,
   ArrowRight
 } from "lucide-react";
 
 export default function HomeAbout() {
+  const navigate = useNavigate();
+
   return (
     <div className="py-20 px-6">
 
@@ -31,18 +34,20 @@ export default function HomeAbout() {
 
           <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-4 pt-4">
             <motion.button 
-              className="group px-8 py-4 bg-[#004643] text-white rounded-3xl font-medium flex items-center justify-center gap-2 border-2 border-black hover:bg-white hover:text-[#004643] transition-all duration-300"
+              className="group px-8 py-4 bg-[#004643] text-white rounded-3xl font-medium flex items-center justify-center gap-2 border-2 border-black hover:bg-white hover:text-[#004643] transition-all duration-300 cursor-pointer"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/signup')}
             >
               Start Your Journey
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </motion.button>
             
             <motion.button 
-              className="group px-8 py-4 bg-white border-2 border-[#004643] text-[#004643] rounded-3xl font-medium flex items-center justify-center gap-2  hover:text-[#004643] transition-all duration-300"
+              className="group px-8 py-4 bg-white border-2 border-[#004643] text-[#004643] rounded-3xl font-medium flex items-center justify-center gap-2  hover:text-[#004643] transition-all duration-300 cursor-pointer"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/explore')}
             >
               <Compass className="w-5 h-5 group-hover:rotate-12 transition-transform" />
               Explore Community

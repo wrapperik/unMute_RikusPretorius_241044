@@ -15,6 +15,7 @@ import resourcesRoutes from "./routes/resources.js";
 import journalRoutes from "./routes/journal.js";
 import moodCheckinsRoutes from "./routes/moodcheckins.js";
 import adminRoutes from "./routes/admin.js";
+import userRoutes from "./routes/user.js";
 import { testConnection } from "./db.js";
 import path from "path";
 
@@ -56,6 +57,8 @@ app.use("/addentry", journalRoutes);
 app.use("/moodcheckins", moodCheckinsRoutes);
 // Admin endpoints (flagged content management) - admin only
 app.use("/admin", adminRoutes);
+// User profile management endpoints
+app.use("/user", userRoutes);
 
 // In production, serve the built frontend from the Vite build output
 if (process.env.NODE_ENV === "production") {
@@ -69,7 +72,7 @@ if (process.env.NODE_ENV === "production") {
     if (req.path.startsWith('/auth') || req.path.startsWith('/posts') || 
         req.path.startsWith('/resources') || req.path.startsWith('/journal') || 
         req.path.startsWith('/addentry') || req.path.startsWith('/moodcheckins') || 
-        req.path.startsWith('/admin')) {
+        req.path.startsWith('/admin') || req.path.startsWith('/user')) {
       return next(); // Let API routes pass through
     }
     // Serve index.html for all other routes (SPA fallback)
