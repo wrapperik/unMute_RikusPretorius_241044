@@ -96,7 +96,7 @@ body {
 .liked-heart,
 .liked-heart svg,
 .liked-heart path {
-  fill: url(#likeGradient) !important;
+  fill: rgb(84, 201, 0) !important;
   stroke: none !important;
 }
 

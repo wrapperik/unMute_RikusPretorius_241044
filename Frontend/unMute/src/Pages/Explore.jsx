@@ -119,12 +119,12 @@ export default function Explore() {
 
   // Topic color mapping
   const topicColors = {
-    Joy: 'bg-white border-1 border-base-500',
+    Joy: 'bg-[#004643] border-1 border-base-500',
     Stress: 'bg-white border-1  border-base-500',
-    Anxiety: 'bg-white border-1 border-base-500',
-    Depression: 'bg-white border-1 border-base-500',
-    Motivation: 'bg-white border-1 border-base-500',
-    Other: 'bg-white border-1  border-base-500',
+    Anxiety: 'bg-[#004643] border-1 border-base-500',
+    Depression: 'bg-[#004643] border-1 border-base-500',
+    Motivation: 'bg-[#004643] border-1 border-base-500',
+    Other: 'bg-[#004643] border-1  border-base-500',
   };
 
   // Get unique topics and their post counts
@@ -160,7 +160,7 @@ export default function Explore() {
                   onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleTopicChange('All')}
                   className={`flex items-center whitespace-nowrap px-3 md:px-2 py-2 md:py-2 rounded-xl cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black text-sm md:text-sm ${
                     selectedTopic === 'All' 
-                      ? 'bg-black text-white shadow-sm' 
+                      ? 'bg-[#004643] text-white shadow-sm' 
                       : 'bg-white hover:bg-gray-100 border-2 border-gray-200 hover:border-black'
                   }`}
                 >
@@ -180,13 +180,13 @@ export default function Explore() {
                     onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleTopicChange(topic)}
                     className={`flex items-center whitespace-nowrap px-3 md:px-2 py-2 md:py-2 rounded-xl cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black text-sm md:text-sm ${
                       selectedTopic === topic 
-                        ? 'bg-black text-white shadow-sm' 
-                        : 'bg-white hover:bg-gray-100 border-2 border-gray-200 hover:border-black'
+                        ? 'bg-[#004643] text-white shadow-sm' 
+                        : 'bg-white hover:bg-gray-100 border-2 border-gray-200 hover:border-[#004643]'
                     }`}
                   >
                     <h2 className="font-medium text-xs md:text-sm">{topic}</h2>
                     <h2 className={`ml-2 md:ml-auto px-1.5 md:px-2 py-0.5 rounded-full text-xs font-semibold ${
-                      selectedTopic === topic ? 'bg-white text-black' : 'bg-black text-white'
+                      selectedTopic === topic ? 'bg-white text-black' : 'bg-[#004643] text-white'
                     }`}>{count}</h2>
                   </div>
                 </li>

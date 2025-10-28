@@ -87,3 +87,25 @@ const PORT = process.env.PORT || 5050;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// Global Express error handler - logs error details and returns a generic 500 to clients.
+// This will catch errors passed to next(err) and any errors routed here by async wrappers.
+app.use((err, req, res, next) => {
+  try {
+    console.error('Unhandled error in request:', err && (err.stack || err));
+  } catch (logErr) {
+    console.error('Error while logging an error:', logErr);
+  }
+  // Send minimal error info to client to avoid leaking internals
+  res.status(500).json({ status: 'error', error: err && err.message ? err.message : 'Internal server error' });
+});
+
+// Process-level handlers so crashes and unhandled promise rejections show up clearly in the terminal.
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception thrown:', err && (err.stack || err));
+  // Depending on the app requirements you may want to exit the process here.
+});

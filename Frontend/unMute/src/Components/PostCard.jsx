@@ -83,7 +83,7 @@ export default function PostCard({ post, onDelete }) {
 
   return (
     <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      <div className="card-body card bg-white rounded-2xl text-black shadow-md hover:shadow-2xl p-6 h-auto cursor-pointer transition-all duration-300 hover:-translate-y-1 border border-gray-100" onClick={handleClick}>
+      <div className="card-body card bg-[#e9ede7] rounded-2xl text-black shadow-md hover:shadow-2xl p-6 h-auto cursor-pointer transition-all duration-300 hover:-translate-y-1 border border-gray-100 hover:border-green-800" onClick={handleClick}>
         <div className="flex flex-col gap-3">
           <div className="flex items-start justify-between gap-2">
             <h2 className="card-title font-bold text-base leading-tight flex-1">
@@ -145,18 +145,18 @@ function AnimateHolder({ show, canDelete, likes, onDelete, post, navigate, setLi
                 })
                 .catch(() => alert('Network error'));
             }} 
-            className="rounded-full h-10 w-10 bg-white text-black items-center justify-center border-[0.5px] border-[#c4c4c4] shadow-md flex transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-black hover:text-white cursor-pointer" 
+            className="rounded-full h-10 w-10 bg-white text-black items-center justify-center border-[0.5px] border-[#c4c4c4] shadow-md flex transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-[#004643] hover:text-white cursor-pointer" 
             style={{ pointerEvents: 'auto' }}
             aria-label="Flag post"
           >
             <Flag size={16} />
           </div>
-          <div className="rounded-full h-10 w-10 bg-white text-black items-center justify-center border-[0.5px] border-[#c4c4c4] shadow-md flex transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-black hover:text-white cursor-pointer" style={{ pointerEvents: 'auto' }}>
+          <div className="rounded-full h-10 w-10 bg-white text-black items-center justify-center border-[0.5px] border-[#c4c4c4] shadow-md flex transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-[#004643] hover:text-white cursor-pointer" style={{ pointerEvents: 'auto' }}>
             <div onClick={e => { e.stopPropagation(); navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title, from: '/explore', scrollToComments: true } }); }} aria-label="View comments">
               <MessageCircle size={16} />
             </div>
           </div>
-          <div className="rounded-full h-10 w-10 bg-white text-black items-center justify-center flex border-[0.5px] border-[#c4c4c4] shadow-md transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-black hover:text-white cursor-pointer" style={{ pointerEvents: 'auto' }}>
+          <div className="rounded-full h-10 w-10 bg-white text-black items-center justify-center flex border-[0.5px] border-[#c4c4c4] shadow-md transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-[#004643] hover:text-white cursor-pointer" style={{ pointerEvents: 'auto' }}>
             <motion.button
               aria-label={likes.liked_by_user ? 'Unlike' : 'Like'}
               onClick={e => { e.stopPropagation();

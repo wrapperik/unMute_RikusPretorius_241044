@@ -369,6 +369,7 @@ router.delete('/:id', async (req, res) => {
     await pool.query('DELETE FROM PublicPosts WHERE post_id = ?', [postId]);
     res.json({ status: 'ok', message: 'Post deleted successfully' });
   } catch (err) {
+    console.error('DELETE /posts/:id error:', err);
     res.status(500).json({ status: 'error', error: err.message });
   }
 });
