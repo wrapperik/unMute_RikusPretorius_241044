@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from "react";
-import { Send, Trash2, Flag as FlagIcon, XCircle, AlertTriangle } from 'lucide-react'
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { Send, Trash2, Flag as FlagIcon, XCircle, AlertTriangle, MoreHorizontal } from 'lucide-react'
 import { AuthContext } from "../context/AuthContext";
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5050';
@@ -9,7 +9,20 @@ const CommentSection = ({ postId }) => {
     const [comments, setComments] = useState([]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(true);
+    const [openMenuId, setOpenMenuId] = useState(null);
     const isAdmin = user && (user.is_admin || user.isAdmin);
+    const menuRef = useRef(null);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setOpenMenuId(null);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     async function loadComments() {
         setLoading(true);
@@ -201,15 +214,32 @@ const CommentSection = ({ postId }) => {
                                                         >
                                                             <Trash2 size={14} className="text-red-600" />
                                                         </button>
-                                                    ) : !isAdmin && (
-                                                        <button 
-                                                            className="p-1 hover:bg-gray-100 rounded-lg transition-colors" 
-                                                            onClick={() => handleFlag(comment.comment_id)} 
-                                                            aria-label="Flag comment"
-                                                            title="Flag comment"
-                                                        >
-                                                            <FlagIcon size={14} className="text-gray-600" />
-                                                        </button>
+                                                    ) : (
+                                                        <div className="relative" ref={openMenuId === comment.comment_id ? menuRef : null}>
+                                                            <button 
+                                                                className="p-1 hover:bg-gray-100 rounded-lg transition-colors" 
+                                                                onClick={() => setOpenMenuId(openMenuId === comment.comment_id ? null : comment.comment_id)}
+                                                                aria-label="More options"
+                                                                title="More options"
+                                                            >
+                                                                <MoreHorizontal size={14} className="text-gray-600" />
+                                                            </button>
+                                                            
+                                                            {openMenuId === comment.comment_id && (
+                                                                <div className="absolute right-0 top-full mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                                                                    <button 
+                                                                        className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center gap-2"
+                                                                        onClick={() => {
+                                                                            handleFlag(comment.comment_id);
+                                                                            setOpenMenuId(null);
+                                                                        }}
+                                                                    >
+                                                                        <FlagIcon size={14} className="text-gray-600" />
+                                                                        Flag
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>
