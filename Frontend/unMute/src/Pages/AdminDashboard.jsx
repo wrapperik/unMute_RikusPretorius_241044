@@ -217,7 +217,7 @@ export default function AdminDashboard() {
     return (
       <>
         <PageHeader />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <p className="text-gray-600">Loading admin dashboard...</p>
         </main>
       </>
@@ -233,7 +233,7 @@ export default function AdminDashboard() {
   return (
     <>
       <PageHeader />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <aside className="lg:col-span-1">

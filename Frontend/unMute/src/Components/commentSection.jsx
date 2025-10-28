@@ -164,7 +164,7 @@ const CommentSection = ({ postId }) => {
                         <div className="space-y-3 mb-4 max-h-[60vh] overflow-y-auto pr-2">
                             {comments.length === 0 && <p className="text-gray-500 text-sm">No comments yet. Be the first to comment!</p>}
                             {comments.map((comment) => (
-                                <div key={comment.comment_id} className={`rounded-2xl p-4 shadow-sm border ${comment.is_flagged && isAdmin ? 'bg-red-50 border-red-300' : 'bg-white border-gray-200'}`}>
+                                <div key={comment.comment_id} className={`rounded-3xl p-4 shadow-sm border ${comment.is_flagged && isAdmin ? 'bg-red-50 border-red-300' : 'bg-white border-gray-200'}`}>
                                     <div className="flex items-start gap-3">
                                         <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-green-800 via-green-750 to-green-900 flex items-center justify-center text-white font-bold text-sm">
                                             {(comment.username || 'A').charAt(0).toUpperCase()}
@@ -177,7 +177,7 @@ const CommentSection = ({ postId }) => {
                                                 <div className="flex items-center gap-1">
                                                     {isAdmin ? (
                                                         <button 
-                                                            className="p-1 hover:bg-red-50 rounded-lg transition-colors" 
+                                                            className="p-1 hover:bg-red-50 rounded-xl transition-colors" 
                                                             onClick={() => handleAdminDeleteComment(comment.comment_id)} 
                                                             aria-label="Delete comment (admin)"
                                                             title="Delete comment (admin)"
@@ -186,7 +186,7 @@ const CommentSection = ({ postId }) => {
                                                         </button>
                                                     ) : user && user.id && Number(user.id) === Number(comment.user_id) ? (
                                                         <button 
-                                                            className="p-1 hover:bg-red-50 rounded-lg transition-colors" 
+                                                            className="p-1 hover:bg-red-50 rounded-xl transition-colors" 
                                                             onClick={() => handleDelete(comment.comment_id)} 
                                                             aria-label="Delete comment"
                                                             title="Delete comment"
@@ -195,7 +195,7 @@ const CommentSection = ({ postId }) => {
                                                         </button>
                                                     ) : !isAdmin && (
                                                         <button 
-                                                            className="p-1 hover:bg-gray-100 rounded-lg transition-colors" 
+                                                            className="p-1 hover:bg-gray-100 rounded-xl transition-colors" 
                                                             onClick={() => handleFlag(comment.comment_id)} 
                                                             aria-label="Flag comment"
                                                             title="Flag comment"
@@ -223,7 +223,7 @@ const CommentSection = ({ postId }) => {
                                                 <div className="mt-3 pt-3 border-t border-red-200 flex gap-2">
                                                     <button
                                                         onClick={() => handleDismissCommentFlag(comment.comment_id)}
-                                                        className="px-2 py-1 bg-gray-600 text-white rounded-lg text-xs hover:bg-gray-700 transition-colors flex items-center gap-1"
+                                                        className="px-2 py-1 bg-white border-2 border-[#004643] text-[#004643] rounded-xl text-xs hover:bg-[#004643] hover:text-white transition-colors flex items-center gap-1"
                                                     >
                                                         <XCircle size={12} />
                                                         Dismiss Flag
@@ -239,7 +239,7 @@ const CommentSection = ({ postId }) => {
                         <form onSubmit={handleAddComment} className="mt-4">
                             <div className="flex flex-col gap-2">
                                 <textarea
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-none text-sm"
+                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-none text-sm"
                                     placeholder="Add a comment..."
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
@@ -247,7 +247,7 @@ const CommentSection = ({ postId }) => {
                                 />
                                 <button 
                                     type="submit" 
-                                    className="self-end px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 text-sm font-medium"
+                                    className="self-end px-4 py-2 bg-[#004643] text-white rounded-xl hover:bg-[#003832] transition-colors flex items-center gap-2 text-sm font-medium"
                                 >
                                     <Send size={16} />
                                     Post Comment

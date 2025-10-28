@@ -1,7 +1,16 @@
 import React, { useState, useContext } from 'react'
+import { Type, Smile, FileText } from 'lucide-react'
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5050';
 import AddEntryPageHeader from '../Components/addEntryPageHeader'
 import { AuthContext } from '../context/AuthContext'
+
+const moodColors = {
+  excited: 'bg-green-50 border-2 border-green-200 text-green-800 hover:bg-green-100',
+  happy: 'bg-yellow-50 border-2 border-yellow-200 text-yellow-800 hover:bg-yellow-100',
+  indifferent: 'bg-gray-50 border-2 border-gray-200 text-gray-800 hover:bg-gray-100',
+  sad: 'bg-blue-50 border-2 border-blue-200 text-blue-800 hover:bg-blue-100',
+  frustrated: 'bg-red-50 border-2 border-red-200 text-red-800 hover:bg-red-100',
+};
 
 export default function AddEntryPage() {
     const [title, setTitle] = useState("");
@@ -76,26 +85,29 @@ export default function AddEntryPage() {
     return (
         <>
             <AddEntryPageHeader onSave={handleSubmit} submitting={submitting} />
-            <div className="max-w-7xl mx-auto mt-8 p-6 rounded-xl text-black">
-                <form className="flex flex-col gap-6 mx-5" onSubmit={handleSubmit}>
+            <div className="max-w-3xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
+                <form className="flex flex-col gap-6 bg-white rounded-3xl shadow-md p-8" onSubmit={handleSubmit}>
                     <div className="form-control">
                         <label className="label">
-                            <span className="label-text mb-2 text-black">Title</span>
+                            <span className="label-text text-gray-700 font-semibold mb-2">Title</span>
                         </label>
-                        <input
-                            type="text"
-                            placeholder="Entry title"
-                            className="input input-bordered w-full rounded-full text-black"
-                            value={title}
-                            onChange={e => setTitle(e.target.value)}
-                            required
-                        />
+                        <div className="relative">
+                            <Type className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                                type="text"
+                                placeholder="Give your entry a title..."
+                                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#004643] focus:outline-none transition-colors text-black"
+                                value={title}
+                                onChange={e => setTitle(e.target.value)}
+                                required
+                            />
+                        </div>
                     </div>
                     <div className="form-control">
-                        <label className="label mb-2 text-black">
-                            <span className="label-text">Mood</span>
+                        <label className="label">
+                            <span className="label-text text-gray-700 font-semibold mb-2">Mood</span>
                         </label>
-                        <div className="flex gap-3 mt-2">
+                        <div className="flex flex-wrap gap-2 mt-2">
                                 {[
                                   { key: 'excited', label: 'Excited' },
                                   { key: 'happy', label: 'Happy' },
@@ -106,7 +118,11 @@ export default function AddEntryPage() {
                                     <button
                                         type="button"
                                         key={t.key}
-                                        className={`btn btn-sm rounded-full px-4 text-black border border-gray-300 bg-base-100 hover:bg-gray-200 focus:bg-gray-300 ${mood === t.key ? 'bg-gray-300 font-bold' : ''}`}
+                                        className={`px-4 py-2 rounded-full font-semibold text-sm transition-all ${
+                                          mood === t.key
+                                            ? moodColors[t.key]
+                                            : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-[#004643]'
+                                        }`}
                                         onClick={() => setMood(t.key)}
                                     >
                                         {t.label}
@@ -116,20 +132,20 @@ export default function AddEntryPage() {
                     </div>
                     <div className="form-control relative">
                         <label className="label">
-                            <span className="label-text mb-2 text-black">Body</span>
+                            <span className="label-text text-gray-700 font-semibold mb-2">Body</span>
                         </label>
                         <textarea
-                            placeholder="Write your entry here..."
-                            className="textarea textarea-bordered w-full min-h-[120px] text-black rounded-3xl"
+                            placeholder="Write your thoughts..."
+                            className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-[#004643] focus:outline-none transition-colors text-black min-h-[200px]"
                             value={body}
                             onChange={e => setBody(e.target.value)}
                             maxLength={5000}
                             required
                         />
-                        <span className="absolute right-2 bottom-2 text-xs text-black bg-white/80 px-2 py-1 rounded-full shadow">{wordCount} / 5000 words</span>
+                        <span className="absolute right-3 bottom-3 text-xs text-gray-500 bg-white px-2 py-1 rounded-full">{wordCount} / 5000 words</span>
                     </div>
-                    {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
-                    {success && <div className="text-green-600 text-sm mt-2">Entry submitted successfully!</div>}
+                    {error && <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{error}</div>}
+                    {success && <div className="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">Entry submitted successfully!</div>}
                 </form>
             </div>
         </>

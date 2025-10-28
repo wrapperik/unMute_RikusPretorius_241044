@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Search, TrendingUp, Clock, Sparkles } from 'lucide-react';
 import PageHeader from '../Components/explorePageHeader.jsx'
 import PostCard from '../Components/PostCard.jsx'
 import { AuthContext } from '../context/AuthContext.jsx'
@@ -22,6 +23,28 @@ function formatTimeSince(date) {
   return `${weeks}w`;
 }
 
+// Skeleton loader component
+function PostSkeleton() {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-4 animate-pulse">
+      <div className="flex gap-3">
+        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-200"></div>
+        <div className="flex-1 space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-4 bg-gray-200 rounded w-24"></div>
+            <div className="h-4 bg-gray-200 rounded w-12"></div>
+          </div>
+          <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Explore() {
   // State for posts + UI state
   const [posts, setPosts] = useState([]);
@@ -30,6 +53,8 @@ export default function Explore() {
   // State for selected topic filter
   const [selectedTopic, setSelectedTopic] = useState('All');
   const [isFiltering, setIsFiltering] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('recent'); // 'recent', 'trending', 'top'
   
   const handleDeletePost = (postId) => {
     setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
@@ -41,7 +66,7 @@ export default function Explore() {
     // Add a small delay to show the transition
     setTimeout(() => {
       setIsFiltering(false);
-    }, 400);
+    }, 300);
   };
 
   useEffect(() => {
@@ -99,8 +124,19 @@ export default function Explore() {
     return (
       <>
         <PageHeader />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8">
-          <p>Loading posts…</p>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            <aside className="w-full lg:w-72">
+              <div className="space-y-2">
+                {[1, 2, 3, 4, 5].map(i => (
+                  <div key={i} className="h-10 bg-gray-200 rounded-xl animate-pulse"></div>
+                ))}
+              </div>
+            </aside>
+            <section className="flex-1 max-w-2xl space-y-4">
+              {[1, 2, 3].map(i => <PostSkeleton key={i} />)}
+            </section>
+          </div>
         </main>
       </>
     );
@@ -110,8 +146,16 @@ export default function Explore() {
     return (
       <>
         <PageHeader />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8">
-          <p className="text-red-600">Error loading posts: {error}</p>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+            <p className="text-red-600 font-medium">Error loading posts: {error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
         </main>
       </>
     );
@@ -119,12 +163,12 @@ export default function Explore() {
 
   // Topic color mapping
   const topicColors = {
-    Joy: 'bg-[#004643] border-1 border-base-500',
-    Stress: 'bg-white border-1  border-base-500',
-    Anxiety: 'bg-[#004643] border-1 border-base-500',
-    Depression: 'bg-[#004643] border-1 border-base-500',
-    Motivation: 'bg-[#004643] border-1 border-base-500',
-    Other: 'bg-[#004643] border-1  border-base-500',
+    Joy: 'bg-yellow-50 border-2 border-yellow-200',
+    Stress: 'bg-red-50 border-2 border-red-200',
+    Anxiety: 'bg-blue-50 border-2 border-blue-200',
+    Depression: 'bg-purple-50 border-2 border-purple-200',
+    Motivation: 'bg-green-50 border-2 border-green-200',
+    Other: 'bg-gray-50 border-2 border-gray-200',
   };
 
   // Get unique topics and their post counts
@@ -135,101 +179,209 @@ export default function Explore() {
     return acc;
   }, {});
 
-  // Filter posts based on selected topic
-  const filteredPosts = selectedTopic === 'All' ? posts : posts.filter(post => post.topic === selectedTopic);
+  // Filter and sort posts
+  let filteredPosts = selectedTopic === 'All' ? posts : posts.filter(post => post.topic === selectedTopic);
+  
+  // Search filter
+  if (searchQuery.trim()) {
+    const query = searchQuery.toLowerCase();
+    filteredPosts = filteredPosts.filter(post => 
+      post.title.toLowerCase().includes(query) ||
+      post.description.toLowerCase().includes(query) ||
+      (post.username && post.username.toLowerCase().includes(query))
+    );
+  }
 
-  // PostCard is now a shared component in ../Components/PostCard.jsx
+  // Sort posts
+  if (sortBy === 'trending') {
+    filteredPosts = [...filteredPosts].sort((a, b) => (b.likes?.count || 0) - (a.likes?.count || 0));
+  } else if (sortBy === 'top') {
+    filteredPosts = [...filteredPosts].sort((a, b) => (b.likes?.count || 0) - (a.likes?.count || 0));
+  }
+  // 'recent' is default order from API
 
   return (
     <>
-      <PageHeader />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-col lg:flex-row gap-8">
-        {/* Filtering System */}
-        <aside className="text-black w-full lg:w-72 lg:sticky top-28 self-start rounded-2xl lg:rounded-2xl md:rounded-2xl" aria-label="Filter posts by topic">
-          <h1 className="text-xl font-bold mb-4 flex items-center gap-2 hidden md:flex">
-            Browse Topics
-          </h1>
-          <div className="text-black flex md:flex">
-            <ul className="space-y-2 w-full md:space-y-2 flex md:flex-col overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 gap-2 md:gap-0" role="list">
-              <li className="flex-shrink-0 md:flex-shrink">
-                <div
-                  role="button"
-                  tabIndex={0}
-                  aria-pressed={selectedTopic === 'All'}
-                  onClick={() => handleTopicChange('All')}
-                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleTopicChange('All')}
-                  className={`flex items-center whitespace-nowrap px-3 md:px-2 py-2 md:py-2 rounded-xl cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black text-sm md:text-sm ${
-                    selectedTopic === 'All' 
-                      ? 'bg-[#004643] text-white shadow-sm' 
-                      : 'bg-white hover:bg-gray-100 border-2 border-gray-200 hover:border-black'
-                  }`}
-                >
-                  <h2 className="font-medium text-xs md:text-sm">All</h2>
-                  <h2 className={`ml-2 md:ml-auto px-1.5 md:px-2 py-0.5 rounded-full text-xs font-semibold ${
-                    selectedTopic === 'All' ? 'bg-white text-black' : 'bg-black text-white'
-                  }`}>{posts.length}</h2>
-                </div>
-              </li>
-              {Object.entries(topics).map(([topic, count]) => (
-                <li key={topic} className="flex-shrink-0 md:flex-shrink">
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    aria-pressed={selectedTopic === topic}
-                    onClick={() => handleTopicChange(topic)}
-                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleTopicChange(topic)}
-                    className={`flex items-center whitespace-nowrap px-3 md:px-2 py-2 md:py-2 rounded-xl cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black text-sm md:text-sm ${
-                      selectedTopic === topic 
-                        ? 'bg-[#004643] text-white shadow-sm' 
-                        : 'bg-white hover:bg-gray-100 border-2 border-gray-200 hover:border-[#004643]'
+      <PageHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row gap-6">
+        {/* Sidebar - Topics & Filters */}
+        <aside className="w-full lg:w-80 lg:sticky lg:top-24 self-start" aria-label="Filter posts by topic">
+          {/* Topics Section */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <Sparkles size={20} className="text-[#004643]" />
+              Topics
+            </h2>
+            
+            {/* Mobile: Horizontal scroll */}
+            <div className="lg:hidden">
+              <ul className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide" role="list">
+                <li className="flex-shrink-0">
+                  <button
+                    onClick={() => handleTopicChange('All')}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                      selectedTopic === 'All' 
+                        ? 'bg-[#004643] text-white shadow-md' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    <h2 className="font-medium text-xs md:text-sm">{topic}</h2>
-                    <h2 className={`ml-2 md:ml-auto px-1.5 md:px-2 py-0.5 rounded-full text-xs font-semibold ${
-                      selectedTopic === topic ? 'bg-white text-black' : 'bg-[#004643] text-white'
-                    }`}>{count}</h2>
-                  </div>
+                    All <span className="ml-1 opacity-75">({posts.length})</span>
+                  </button>
+                </li>
+                {Object.entries(topics).map(([topic, count]) => (
+                  <li key={topic} className="flex-shrink-0">
+                    <button
+                      onClick={() => handleTopicChange(topic)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                        selectedTopic === topic 
+                          ? 'bg-[#004643] text-white shadow-md' 
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {topic} <span className="ml-1 opacity-75">({count})</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Desktop: Vertical list */}
+            <ul className="hidden lg:block space-y-2" role="list">
+              <li>
+                <button
+                  onClick={() => handleTopicChange('All')}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    selectedTopic === 'All' 
+                      ? 'bg-[#004643] text-white shadow-md' 
+                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <span>All Topics</span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                    selectedTopic === 'All' ? 'bg-white/20 text-white' : 'bg-[#004643] text-white'
+                  }`}>{posts.length}</span>
+                </button>
+              </li>
+              {Object.entries(topics).map(([topic, count]) => (
+                <li key={topic}>
+                  <button
+                    onClick={() => handleTopicChange(topic)}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                      selectedTopic === topic 
+                        ? 'bg-[#004643] text-white shadow-md' 
+                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span>{topic}</span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                      selectedTopic === topic ? 'bg-white/20 text-white' : 'bg-[#004643] text-white'
+                    }`}>{count}</span>
+                  </button>
                 </li>
               ))}
             </ul>
           </div>
+
+          {/* Trending Stats - Desktop Only */}
+          <div className="hidden lg:block mt-4 bg-gradient-to-br from-[#004643] to-[#003832] rounded-2xl p-4 text-white shadow-lg">
+            <h3 className="font-bold mb-3 flex items-center gap-2">
+              <TrendingUp size={18} />
+              Community Stats
+            </h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="opacity-90">Total Posts</span>
+                <span className="font-bold text-lg">{posts.length}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="opacity-90">Active Topics</span>
+                <span className="font-bold text-lg">{Object.keys(topics).length}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="opacity-90">Filtered Results</span>
+                <span className="font-bold text-lg">{filteredPosts.length}</span>
+              </div>
+            </div>
+          </div>
         </aside>
 
-        {/* Cards Section - Pinterest Masonry Layout */}
-        <section 
-          className="flex-1 masonry-grid" 
-          aria-live="polite" 
-          aria-label="Posts list"
-        >
+        {/* Main Feed */}
+        <section className="flex-1 max-w-2xl mx-auto w-full">
+          {/* Sort Controls */}
+          <div className="bg-white border border-gray-200 rounded-xl p-3 mb-4 shadow-sm">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+              <button
+                onClick={() => setSortBy('recent')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                  sortBy === 'recent' 
+                    ? 'bg-[#004643] text-white' 
+                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Clock size={16} />
+                Recent
+              </button>
+              <button
+                onClick={() => setSortBy('trending')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                  sortBy === 'trending' 
+                    ? 'bg-[#004643] text-white' 
+                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <TrendingUp size={16} />
+                Trending
+              </button>
+              <button
+                onClick={() => setSortBy('top')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                  sortBy === 'top' 
+                    ? 'bg-[#004643] text-white' 
+                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Sparkles size={16} />
+                Top
+              </button>
+            </div>
+          </div>
+
+          {/* Posts Feed */}
           {isFiltering ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+            <div className="space-y-4">
+              {[1, 2, 3].map(i => <PostSkeleton key={i} />)}
+            </div>
+          ) : filteredPosts.length === 0 ? (
+            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+              <div className="text-gray-400 mb-4">
+                <Search size={48} className="mx-auto" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No posts found</h3>
+              <p className="text-gray-500 text-sm">
+                {searchQuery ? `No results for "${searchQuery}"` : 'No posts match your filters'}
+              </p>
             </div>
           ) : (
-            <AnimatePresence mode="wait">
-              {filteredPosts.map((post, idx) => (
-                <motion.div
-                  key={post.id}
-                  initial={{ scale: 0.8, opacity: 0, y: 50 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
-                  exit={{ scale: 0.8, opacity: 0, transition: { duration: 0.2 } }}
-                  transition={{ 
-                    type: 'spring', 
-                    stiffness: 100, 
-                    damping: 15, 
-                    delay: idx * 0.03 
-                  }}
-                  style={{
-                    breakInside: 'avoid',
-                    marginBottom: '1.5rem',
-                    display: 'inline-block',
-                    width: '100%'
-                  }}
-                >
-                  <PostCard post={post} onDelete={handleDeletePost} />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            <div className="space-y-4">
+              <AnimatePresence mode="popLayout">
+                {filteredPosts.map((post, idx) => (
+                  <motion.div
+                    key={post.id}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+                    transition={{ 
+                      duration: 0.3,
+                      delay: idx * 0.05,
+                      layout: { duration: 0.3 }
+                    }}
+                  >
+                    <PostCard post={post} onDelete={handleDeletePost} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
           )}
         </section>
       </main>

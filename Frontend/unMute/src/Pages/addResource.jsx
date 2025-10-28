@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
+import { Type, Link as LinkIcon, FileText } from 'lucide-react'
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5050';
 import AddPostPageHeader from '../Components/addPostPageHeader'
 import { AuthContext } from '../context/AuthContext.jsx';
@@ -57,48 +58,54 @@ export default function AddResourcePage() {
     return (
         <>
             <AddPostPageHeader onPost={handleSubmit} submitting={submitting} titleOverride="Add Resource" />
-            <div className="max-w-7xl mx-auto mt-8 p-6 rounded-xl text-black">
-                <form className="flex flex-col gap-6 mx-5" onSubmit={e => e.preventDefault()}>
+            <div className="max-w-3xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
+                <form className="flex flex-col gap-6 bg-white rounded-3xl shadow-md p-8" onSubmit={e => e.preventDefault()}>
                     <div className="form-control">
                         <label className="label">
-                            <span className="label-text mb-2 text-black">Title</span>
+                            <span className="label-text text-gray-700 font-semibold mb-2">Title</span>
                         </label>
-                        <input
-                            type="text"
-                            placeholder="Resource title"
-                            className="input input-bordered w-full rounded-full text-black"
-                            value={title}
-                            onChange={e => setTitle(e.target.value)}
-                            required
-                        />
+                        <div className="relative">
+                            <Type className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                                type="text"
+                                placeholder="Resource title..."
+                                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#004643] focus:outline-none transition-colors text-black"
+                                value={title}
+                                onChange={e => setTitle(e.target.value)}
+                                required
+                            />
+                        </div>
                     </div>
                     <div className="form-control">
                         <label className="label">
-                            <span className="label-text mb-2 text-black">URL (optional)</span>
+                            <span className="label-text text-gray-700 font-semibold mb-2">URL (optional)</span>
                         </label>
-                        <input
-                            type="url"
-                            placeholder="https://example.com"
-                            className="input input-bordered w-full rounded-full text-black"
-                            value={url}
-                            onChange={e => setUrl(e.target.value)}
-                        />
+                        <div className="relative">
+                            <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                                type="url"
+                                placeholder="https://example.com"
+                                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#004643] focus:outline-none transition-colors text-black"
+                                value={url}
+                                onChange={e => setUrl(e.target.value)}
+                            />
+                        </div>
                     </div>
                     <div className="form-control relative">
                         <label className="label">
-                            <span className="label-text mb-2 text-black">Description</span>
+                            <span className="label-text text-gray-700 font-semibold mb-2">Description</span>
                         </label>
                         <textarea
                             placeholder="Describe the resource..."
-                            className="textarea textarea-bordered w-full min-h-[120px] text-black rounded-3xl"
+                            className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-[#004643] focus:outline-none transition-colors text-black min-h-[200px]"
                             value={body}
                             onChange={e => setBody(e.target.value)}
                             maxLength={20000}
                             required
                         />
                     </div>
-                    {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
-                    {success && <div className="text-green-600 text-sm mt-2">Resource submitted successfully!</div>}
+                    {error && <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{error}</div>}
+                    {success && <div className="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">Resource submitted successfully!</div>}
                 </form>
             </div>
         </>

@@ -94,7 +94,7 @@ export default function ResourcesPage() {
     return (
       <>
   <PageHeader />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <p>Loading posts…</p>
         </main>
       </>
@@ -105,7 +105,7 @@ export default function ResourcesPage() {
     return (
       <>
   <PageHeader />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <p className="text-red-600">Error loading posts: {error}</p>
         </main>
       </>
@@ -172,7 +172,7 @@ export default function ResourcesPage() {
   return (
     <>
       <PageHeader />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Resources List */}
         <section className="flex flex-col gap-8 w-full" aria-live="polite" aria-label="Resources list">

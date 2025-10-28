@@ -59,7 +59,7 @@ export default function ViewEntryPage() {
     return (
         <>
             <ViewPostPageHeader />
-            <div className="container mx-auto p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 ">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {loading && <p>Loading entry...</p>}
                 {error && <p className="text-red-600">{error}</p>}
                 {entry && (

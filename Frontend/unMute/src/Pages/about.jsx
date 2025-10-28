@@ -67,7 +67,7 @@ export default function About() {
 
           {/* Mission Statement */}
           <motion.div
-            className="bg-black text-white rounded-3xl p-12 md:p-16 mb-16"
+            className="bg-[#004643] text-white rounded-3xl p-12 md:p-16 mb-16"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -104,7 +104,7 @@ export default function About() {
             {values.map((value, index) => (
               <motion.div
                 key={index}
-                className="bg-white border-2 border-black rounded-2xl p-8 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
+                className="bg-white border-2 border-black rounded-3xl p-8 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -139,7 +139,7 @@ export default function About() {
               </p>
               <Link 
                 to="/explore"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-full font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#004643] text-white rounded-full font-medium hover:bg-white hover:text-[#004643] border-2 border-[#004643] transition-all duration-300"
               >
                 Explore Posts
                 <motion.span
@@ -252,7 +252,7 @@ export default function About() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/signup"
-              className="px-8 py-4 bg-black text-white rounded-full font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300"
+              className="px-8 py-4 bg-[#004643] text-white rounded-full font-medium hover:bg-white hover:text-[#004643] border-2 border-[#004643] transition-all duration-300"
             >
               Join unMute
             </Link>

@@ -28,12 +28,12 @@ function formatTimeSince(dateString) {
 
 export default function ViewPostPage() {
     const topicColors = {
-        Joy: 'bg-yellow-100',
-        Stress: 'bg-red-200',
-        Anxiety: 'bg-blue-200',
-        Depression: 'bg-purple-200',
-        Motivation: 'bg-green-200',
-        Other: 'bg-gray-200 text-gray-900',
+        Joy: 'bg-yellow-50 border-2 border-yellow-200',
+        Stress: 'bg-red-50 border-2 border-red-200',
+        Anxiety: 'bg-blue-50 border-2 border-blue-200',
+        Depression: 'bg-purple-50 border-2 border-purple-200',
+        Motivation: 'bg-green-50 border-2 border-green-200',
+        Other: 'bg-gray-50 border-2 border-gray-200',
     };
     const { id } = useParams();
     const { state } = useLocation();
@@ -126,7 +126,7 @@ export default function ViewPostPage() {
     return (
         <>
             <ViewPostPageHeader />
-            <div className="container mx-auto p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {loading && <p>Loading post...</p>}
                 {error && <p className="text-red-600">{error}</p>}
                 {post && (
@@ -197,7 +197,7 @@ export default function ViewPostPage() {
 
                             {/* Admin Controls */}
                             {isAdmin && (
-                            <div className="mb-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                            <div className="mb-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
                                 <div className="flex items-center gap-2 mb-3">
                                     <AlertTriangle className="h-5 w-5 text-blue-600" />
                                     <h3 className="font-semibold text-blue-900">Admin Controls</h3>
@@ -210,7 +210,7 @@ export default function ViewPostPage() {
                                 <div className="flex gap-3">
                                     <button
                                         onClick={handleDeletePost}
-                                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 text-sm font-medium"
+                                        className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors flex items-center gap-2 text-sm font-medium"
                                     >
                                         <Trash2 className="h-4 w-4" />
                                         Delete Post
@@ -218,7 +218,7 @@ export default function ViewPostPage() {
                                     {post.is_flagged && (
                                         <button
                                             onClick={handleDismissFlag}
-                                            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2 text-sm font-medium"
+                                            className="px-4 py-2 bg-white border-2 border-[#004643] text-[#004643] rounded-xl hover:bg-[#004643] hover:text-white transition-colors flex items-center gap-2 text-sm font-medium"
                                         >
                                             <XCircle className="h-4 w-4" />
                                             Dismiss Flag

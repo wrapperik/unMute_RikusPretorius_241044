@@ -115,7 +115,7 @@ export default function JournalPage() {
   return (
     <>
       <JournalPageHeader />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-col lg:flex-row gap-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row gap-12">
         <aside className="text-black w-full lg:w-1/3 lg:sticky top-28 self-start bg-white rounded-2xl" aria-label="Filter posts by mood">
           <h1 className="text-xl font-bold mb-4 hidden md:block">Browse by Mood</h1>
           <div className="text-black flex">

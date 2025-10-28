@@ -1,16 +1,34 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { motion } from 'framer-motion'
-import { Heart, MessageCircle, Flag, Trash2 } from 'lucide-react'
+import { Heart, MessageCircle, Flag, Trash2, MoreHorizontal, Share2, Bookmark } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext.jsx'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5050';
 
+const topicColors = {
+  Joy: 'bg-yellow-100 border border-yellow-300 text-yellow-900',
+  Stress: 'bg-red-100 border border-red-300 text-red-900',
+  Anxiety: 'bg-blue-100 border border-blue-300 text-blue-900',
+  Depression: 'bg-purple-100 border border-purple-300 text-purple-900',
+  Motivation: 'bg-green-100 border border-green-300 text-green-900',
+  Other: 'bg-gray-100 border border-gray-300 text-gray-900',
+};
+
+const topicGradients = {
+  Joy: 'from-yellow-400 to-orange-400',
+  Stress: 'from-red-400 to-pink-500',
+  Anxiety: 'from-blue-400 to-cyan-500',
+  Depression: 'from-purple-400 to-indigo-500',
+  Motivation: 'from-green-400 to-emerald-500',
+  Other: 'from-gray-400 to-slate-500',
+};
+
 export default function PostCard({ post, onDelete }) {
   const { user } = useContext(AuthContext);
-  const [showReactions, setShowReactions] = useState(false);
-  const [timeoutId, setTimeoutId] = useState(null);
+  const [showActions, setShowActions] = useState(false);
   const [likes, setLikes] = useState(post.likes || { count: 0, liked_by_user: false });
+  const [commentsCount, setCommentsCount] = useState(0);
   const navigate = useNavigate();
   const canDelete = user && (user.id === post.raw.user_id || user.is_admin);
 
@@ -35,22 +53,6 @@ export default function PostCard({ post, onDelete }) {
     }
   };
 
-  const handleMouseEnter = () => {
-    if (timeoutId) clearTimeout(timeoutId);
-    setShowReactions(true);
-  };
-
-  const handleMouseLeave = () => {
-    const id = setTimeout(() => setShowReactions(false), 400);
-    setTimeoutId(id);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [timeoutId]);
-
   // Load likes for this post when component mounts
   useEffect(() => {
     let mounted = true;
@@ -68,132 +70,245 @@ export default function PostCard({ post, onDelete }) {
     return () => { mounted = false; };
   }, [post.id, user]);
 
+  // Load comments count
+  useEffect(() => {
+    let mounted = true;
+    fetch(`${API_BASE}/posts/${post.id}/comments`)
+      .then(res => res.json())
+      .then(json => {
+        if (!mounted) return;
+        if (json.status === 'ok' && json.data) {
+          setCommentsCount(json.data.length);
+        }
+      })
+      .catch(() => {})
+    return () => { mounted = false; };
+  }, [post.id]);
+
   const handleClick = () => {
     navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title, from: '/explore' } });
   };
 
-  // Calculate dynamic line clamp based on content length
-  const getLineClamp = () => {
-    const contentLength = post.description.length;
-    if (contentLength < 100) return 3;
-    if (contentLength < 200) return 5;
-    if (contentLength < 400) return 8;
-    return 12;
+  const handleLike = async (e) => {
+    e.stopPropagation();
+    if (!user || !user.token) { 
+      navigate('/login'); 
+      return; 
+    }
+    
+    const prev = { ...likes };
+    const newLiked = !likes.liked_by_user;
+    setLikes({ count: newLiked ? likes.count + 1 : Math.max(0, likes.count - 1), liked_by_user: newLiked });
+    
+    try {
+      const res = await fetch(`${API_BASE}/posts/${post.id}/like`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${user.token}` }
+      });
+      const json = await res.json();
+      if (!json || json.status !== 'ok') {
+        setLikes(prev);
+      }
+    } catch (err) {
+      setLikes(prev);
+    }
+  };
+
+  const handleFlag = async (e) => {
+    e.stopPropagation();
+    if (!user || !user.token) { 
+      navigate('/login'); 
+      return; 
+    }
+    if (!confirm('Flag this post for review?')) return;
+    
+    try {
+      const res = await fetch(`${API_BASE}/posts/${post.id}/flag`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${user.token}` }
+      });
+      const json = await res.json();
+      if (json.status === 'ok') {
+        alert('Post flagged for review');
+      } else {
+        alert(json.error || 'Failed to flag post');
+      }
+    } catch (err) {
+      alert('Network error');
+    }
+  };
+
+  const handleShare = (e) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/viewpost/${post.id}`;
+    if (navigator.share) {
+      navigator.share({
+        title: post.title,
+        text: post.description.slice(0, 100) + '...',
+        url: url
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url);
+      alert('Link copied to clipboard!');
+    }
   };
 
   return (
-    <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      <div className="card-body card bg-[#e9ede7] rounded-2xl text-black shadow-md hover:shadow-2xl p-6 h-auto cursor-pointer transition-all duration-300 hover:-translate-y-1 border border-gray-100 hover:border-green-800" onClick={handleClick}>
-        <div className="flex flex-col gap-3">
-          <div className="flex items-start justify-between gap-2">
-            <h2 className="card-title font-bold text-base leading-tight flex-1">
-              {post.title}
-            </h2>
-            <h4 className={`text-xs px-3 py-1 rounded-full font-semibold border-2 border-black bg-white whitespace-nowrap`}>{post.topic}</h4>
+    <motion.article 
+      className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 group"
+      whileHover={{ y: -2 }}
+      onClick={handleClick}
+    >
+      <div className="p-5">
+        {/* Header */}
+        <div className="flex items-start gap-3 mb-3">
+          {/* Avatar with gradient based on topic */}
+          <div className={`flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br ${topicGradients[post.topic] || topicGradients.Other} flex items-center justify-center text-white font-bold text-base shadow-md`}>
+            {(post.raw && post.raw.is_anonymous ? 'A' : (post.username || 'U')[0]).toUpperCase()}
           </div>
           
-          <p className="text-sm text-gray-700 leading-relaxed" style={{ 
-            display: '-webkit-box', 
-            WebkitLineClamp: getLineClamp(), 
-            WebkitBoxOrient: 'vertical', 
-            overflow: 'hidden' 
-          }}>
+          {/* User info and metadata */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 flex-wrap min-w-0">
+                <span className="font-bold text-gray-900 text-sm truncate">
+                  {post.raw && post.raw.is_anonymous ? 'Anonymous' : (post.username || 'Unknown')}
+                </span>
+                <span className="text-gray-400">·</span>
+                <span className="text-gray-500 text-sm flex-shrink-0">{post.time}</span>
+              </div>
+              
+              {/* More options button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowActions(!showActions);
+                }}
+                className="flex-shrink-0 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="More options"
+              >
+                <MoreHorizontal size={18} className="text-gray-500" />
+              </button>
+            </div>
+            
+            {/* Topic badge */}
+            <div className="mt-1">
+              <span className={`inline-block text-xs px-2.5 py-1 rounded-full font-semibold ${topicColors[post.topic] || topicColors.Other}`}>
+                {post.topic}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="space-y-2 mb-4 cursor-pointer">
+          <h2 className="font-bold text-lg text-gray-900 leading-tight hover:text-[#004643] transition-colors">
+            {post.title}
+          </h2>
+          <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
             {post.description}
           </p>
-
-          <div className="flex items-center justify-between mt-2 pt-3 border-t border-gray-100">
-            <span className="text-xs text-gray-500">
-              by {post.raw && post.raw.is_anonymous ? 'Anonymous' : (post.username || 'Unknown')}
-            </span>
-            <p className="text-xs font-medium text-gray-400">{post.time}</p>
+        </div>
+        
+        {/* Engagement bar */}
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+          {/* Left: Stats */}
+          <div className="flex items-center gap-4 text-sm text-gray-500">
+            <button
+              onClick={handleLike}
+              className={`flex items-center gap-1.5 hover:text-red-500 transition-colors ${likes.liked_by_user ? 'text-red-500' : ''}`}
+            >
+              <motion.div
+                whileTap={{ scale: 1.3 }}
+                animate={likes.liked_by_user ? { scale: [1, 1.2, 1] } : {}}
+              >
+                <Heart 
+                  size={18} 
+                  className={likes.liked_by_user ? 'fill-red-500' : ''} 
+                />
+              </motion.div>
+              <span className="font-medium">{likes.count || 0}</span>
+            </button>
+            
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title, from: '/explore', scrollToComments: true } });
+              }}
+              className="flex items-center gap-1.5 hover:text-[#004643] transition-colors"
+            >
+              <MessageCircle size={18} />
+              <span className="font-medium">{commentsCount || 0}</span>
+            </button>
+          </div>
+          
+          {/* Right: Action buttons */}
+          <div className="flex items-center gap-2">
+            <motion.button
+              onClick={handleShare}
+              className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-[#004643] transition-colors"
+              whileTap={{ scale: 0.9 }}
+              aria-label="Share"
+            >
+              <Share2 size={16} />
+            </motion.button>
+            
+            <motion.button
+              onClick={handleFlag}
+              className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-orange-500 transition-colors"
+              whileTap={{ scale: 0.9 }}
+              aria-label="Report"
+            >
+              <Flag size={16} />
+            </motion.button>
+            
+            {canDelete && (
+              <motion.button
+                onClick={handleDelete}
+                className="p-2 rounded-full hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors"
+                whileTap={{ scale: 0.9 }}
+                aria-label="Delete"
+              >
+                <Trash2 size={16} />
+              </motion.button>
+            )}
           </div>
         </div>
       </div>
-      <AnimateHolder show={showReactions} posts={{}} canDelete={canDelete} likes={likes} onDelete={handleDelete} post={post} navigate={navigate} setLikes={setLikes} user={user} />
-    </div>
-  );
-}
-
-function AnimateHolder({ show, canDelete, likes, onDelete, post, navigate, setLikes, user }) {
-  return (
-    <>
-      {show && (
+      
+      {/* Actions dropdown */}
+      {showActions && (
         <motion.div
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 30, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="absolute left-0 right-4 -bottom-3 flex justify-end gap-2 px-2 mt-10"
-          style={{ pointerEvents: 'none' }}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute right-4 top-16 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-10 min-w-[160px]"
+          onClick={(e) => e.stopPropagation()}
         >
-          <div 
-            onClick={e => { 
-              e.stopPropagation(); 
-              if (!user || !user.token) { navigate('/login'); return; }
-              if (!confirm('Flag this post for review?')) return;
-              fetch(`${API_BASE}/posts/${post.id}/flag`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${user.token}` }
-              })
-                .then(res => res.json())
-                .then(json => {
-                  if (json.status === 'ok') {
-                    alert('Post flagged for review');
-                  } else {
-                    alert(json.error || 'Failed to flag post');
-                  }
-                })
-                .catch(() => alert('Network error'));
-            }} 
-            className="rounded-full h-10 w-10 bg-white text-black items-center justify-center border-[0.5px] border-[#c4c4c4] shadow-md flex transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-[#004643] hover:text-white cursor-pointer" 
-            style={{ pointerEvents: 'auto' }}
-            aria-label="Flag post"
+          <button
+            onClick={handleShare}
+            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+          >
+            <Share2 size={16} />
+            Share Post
+          </button>
+          <button
+            onClick={handleFlag}
+            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-orange-600"
           >
             <Flag size={16} />
-          </div>
-          <div className="rounded-full h-10 w-10 bg-white text-black items-center justify-center border-[0.5px] border-[#c4c4c4] shadow-md flex transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-[#004643] hover:text-white cursor-pointer" style={{ pointerEvents: 'auto' }}>
-            <div onClick={e => { e.stopPropagation(); navigate(`/viewpost/${post.id}`, { state: { postTitle: post.title, from: '/explore', scrollToComments: true } }); }} aria-label="View comments">
-              <MessageCircle size={16} />
-            </div>
-          </div>
-          <div className="rounded-full h-10 w-10 bg-white text-black items-center justify-center flex border-[0.5px] border-[#c4c4c4] shadow-md transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-[#004643] hover:text-white cursor-pointer" style={{ pointerEvents: 'auto' }}>
-            <motion.button
-              aria-label={likes.liked_by_user ? 'Unlike' : 'Like'}
-              onClick={e => { e.stopPropagation();
-                if (!user || !user.token) { navigate('/login'); return; }
-                const prev = { ...likes };
-                const newLiked = !likes.liked_by_user;
-                setLikes({ count: newLiked ? likes.count + 1 : Math.max(0, likes.count - 1), liked_by_user: newLiked });
-                fetch(`${API_BASE}/posts/${post.id}/like`, {
-                  method: 'POST',
-                  headers: { 'Authorization': `Bearer ${user.token}` }
-                })
-                  .then(async res => {
-                    const body = await res.text();
-                    let json;
-                    try { json = JSON.parse(body); } catch(e) { json = body; }
-                    if (!json || json.status !== 'ok') {
-                      setLikes(prev);
-                    }
-                  })
-                  .catch(err => { setLikes(prev); });
-              }}
-              className="flex items-center justify-center"
-              initial={false}
-              animate={likes.liked_by_user ? { scale: 1.15 } : { scale: 1 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 20 }}
-              whileTap={{ scale: 1.6 }}
-            >
-              <Heart size={16} className={likes.liked_by_user ? 'liked-heart' : ''} />
-            </motion.button>
-          </div>
+            Report Post
+          </button>
           {canDelete && (
-            <div className="rounded-full h-10 w-10 bg-white text-red-600 items-center justify-center flex border-[0.5px] border-[#c4c4c4] shadow-md transform transition duration-200 ease-in-out hover:scale-[1.1] hover:shadow-lg hover:bg-red-600 hover:text-white cursor-pointer" style={{ pointerEvents: 'auto' }} onClick={e => { e.stopPropagation(); onDelete(e); }} title="Delete post">
+            <button
+              onClick={handleDelete}
+              className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-red-600"
+            >
               <Trash2 size={16} />
-            </div>
+              Delete Post
+            </button>
           )}
         </motion.div>
       )}
-    </>
+    </motion.article>
   );
 }

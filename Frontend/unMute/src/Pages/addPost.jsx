@@ -1,7 +1,16 @@
 import React, { useState } from 'react'
+import { Type, Hash, FileText } from 'lucide-react'
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5050';
 import AddPostPageHeader from '../Components/addPostPageHeader'
 
+const topicColors = {
+  Joy: 'bg-yellow-50 border-2 border-yellow-200 text-yellow-800 hover:bg-yellow-100',
+  Stress: 'bg-red-50 border-2 border-red-200 text-red-800 hover:bg-red-100',
+  Anxiety: 'bg-blue-50 border-2 border-blue-200 text-blue-800 hover:bg-blue-100',
+  Depression: 'bg-purple-50 border-2 border-purple-200 text-purple-800 hover:bg-purple-100',
+  Motivation: 'bg-green-50 border-2 border-green-200 text-green-800 hover:bg-green-100',
+  Other: 'bg-gray-50 border-2 border-gray-200 text-gray-800 hover:bg-gray-100',
+};
 
 export default function AddPostPage() {
     const [title, setTitle] = useState("");
@@ -47,31 +56,38 @@ export default function AddPostPage() {
     return (
         <>
             <AddPostPageHeader onPost={handleSubmit} submitting={submitting} />
-            <div className="max-w-7xl mx-auto mt-8 p-6 rounded-xl text-black">
-                <form className="flex flex-col gap-6 mx-5" onSubmit={e => e.preventDefault()}>
+            <div className="max-w-3xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
+                <form className="flex flex-col gap-6 bg-white rounded-3xl shadow-md p-8" onSubmit={e => e.preventDefault()}>
                     <div className="form-control">
                         <label className="label">
-                            <span className="label-text mb-2 text-black">Title</span>
+                            <span className="label-text text-gray-700 font-semibold mb-2">Title</span>
                         </label>
-                        <input
-                            type="text"
-                            placeholder="Post title"
-                            className="input input-bordered w-full rounded-full text-black"
-                            value={title}
-                            onChange={e => setTitle(e.target.value)}
-                            required
-                        />
+                        <div className="relative">
+                            <Type className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                                type="text"
+                                placeholder="Give your post a title..."
+                                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#004643] focus:outline-none transition-colors text-black"
+                                value={title}
+                                onChange={e => setTitle(e.target.value)}
+                                required
+                            />
+                        </div>
                     </div>
                     <div className="form-control">
-                        <label className="label mb-2 text-black">
-                            <span className="label-text">Topic</span>
+                        <label className="label">
+                            <span className="label-text text-gray-700 font-semibold mb-2">Topic</span>
                         </label>
-                        <div className="flex gap-3 mt-2">
+                        <div className="flex flex-wrap gap-2 mt-2">
                             {['Joy', 'Stress', 'Anxiety', 'Depression', 'Motivation','Other'].map(t => (
                                 <button
                                     type="button"
                                     key={t}
-                                    className={`btn btn-sm rounded-full px-4 text-black border border-gray-300 bg-base-100 hover:bg-gray-200 focus:bg-gray-300 ${topic === t ? 'bg-gray-300 font-bold' : ''}`}
+                                    className={`px-4 py-2 rounded-full font-semibold text-sm transition-all ${
+                                      topic === t 
+                                        ? topicColors[t]
+                                        : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-[#004643]'
+                                    }`}
                                     onClick={() => setTopic(t)}
                                 >
                                     {t}
@@ -81,30 +97,30 @@ export default function AddPostPage() {
                     </div>
                     <div className="form-control relative">
                         <label className="label">
-                            <span className="label-text mb-2 text-black">Body</span>
+                            <span className="label-text text-gray-700 font-semibold mb-2">Body</span>
                         </label>
                         <textarea
-                            placeholder="Write your post here..."
-                            className="textarea textarea-bordered w-full min-h-[120px] text-black rounded-3xl"
+                            placeholder="Share your thoughts..."
+                            className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-[#004643] focus:outline-none transition-colors text-black min-h-[200px]"
                             value={body}
                             onChange={e => setBody(e.target.value)}
                             maxLength={5000}
                             required
                         />
-                        <span className="absolute right-2 bottom-2 text-xs text-black bg-white/80 px-2 py-1 rounded-full shadow">{wordCount} / 5000 words</span>
+                        <span className="absolute right-3 bottom-3 text-xs text-gray-500 bg-white px-2 py-1 rounded-full">{wordCount} / 5000 words</span>
                     </div>
-                    <div className="form-control flex-row items-center gap-2">
+                    <div className="form-control flex-row items-center gap-3 p-4 bg-gray-50 rounded-xl">
                         <input
                             type="checkbox"
                             id="anonymous"
-                            className="checkbox"
+                            className="checkbox checkbox-sm border-2 border-gray-300 [--chkbg:#004643] [--chkfg:white]"
                             checked={isAnonymous}
                             onChange={e => setIsAnonymous(e.target.checked)}
                         />
-                        <label htmlFor="anonymous" className="label-text mx-2">Post anonymously</label>
+                        <label htmlFor="anonymous" className="label-text text-gray-700 cursor-pointer">Post anonymously</label>
                     </div>
-                    {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
-                    {success && <div className="text-green-600 text-sm mt-2">Post submitted successfully!</div>}
+                    {error && <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{error}</div>}
+                    {success && <div className="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">Post submitted successfully!</div>}
                 </form>
             </div>
         </>
