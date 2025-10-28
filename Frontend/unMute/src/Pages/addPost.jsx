@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
+import { AuthContext } from '../context/AuthContext'
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5050';
 import AddPostPageHeader from '../Components/addPostPageHeader'
 
 
 export default function AddPostPage() {
+    const { user } = useContext(AuthContext);
     const [title, setTitle] = useState("");
     const [topic, setTopic] = useState("");
     const [body, setBody] = useState("");
@@ -21,7 +23,10 @@ export default function AddPostPage() {
         try {
             const res = await fetch(`${API_BASE}/posts`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.token}`
+                },
                 body: JSON.stringify({
                     title,
                     topic,

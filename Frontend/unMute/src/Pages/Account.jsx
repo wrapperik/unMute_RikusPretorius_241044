@@ -251,9 +251,17 @@ export default function Account() {
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8">
             {/* Avatar */}
             <div className="relative">
-              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-[#004643] to-[#003832] rounded-full flex items-center justify-center text-white text-4xl sm:text-5xl font-bold shadow-lg">
-                {(profile.username || profile.email)?.charAt(0).toUpperCase()}
-              </div>
+              {profile.profilePicture ? (
+                <img 
+                  src={`/${profile.profilePicture}`} 
+                  alt={`${profile.username || profile.email}'s avatar`}
+                  className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover shadow-lg"
+                />
+              ) : (
+                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-[#004643] to-[#003832] rounded-full flex items-center justify-center text-white text-4xl sm:text-5xl font-bold shadow-lg">
+                  {(profile.username || profile.email)?.charAt(0).toUpperCase()}
+                </div>
+              )}
               {user.is_admin && (
                 <div className="absolute -bottom-2 -right-2 bg-yellow-400 rounded-full p-2 shadow-lg">
                   <Shield className="w-5 h-5 text-yellow-900" />

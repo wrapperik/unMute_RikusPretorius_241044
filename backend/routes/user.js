@@ -30,7 +30,7 @@ const authenticateToken = (req, res, next) => {
 router.get("/profile", authenticateToken, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      "SELECT user_id, email, username, is_admin FROM users WHERE user_id = ?",
+      "SELECT user_id, email, username, is_admin, profile_picture FROM users WHERE user_id = ?",
       [req.user.id]
     );
 
@@ -45,7 +45,8 @@ router.get("/profile", authenticateToken, async (req, res) => {
         id: user.user_id,
         email: user.email,
         username: user.username,
-        is_admin: user.is_admin
+        is_admin: user.is_admin,
+        profilePicture: user.profile_picture || null
       },
     });
   } catch (err) {
@@ -106,7 +107,7 @@ router.put("/profile", authenticateToken, async (req, res) => {
 
     // Fetch updated user data
     const [rows] = await pool.query(
-      "SELECT user_id, email, username, is_admin FROM users WHERE user_id = ?",
+      "SELECT user_id, email, username, is_admin, profile_picture FROM users WHERE user_id = ?",
       [req.user.id]
     );
 
@@ -119,6 +120,7 @@ router.put("/profile", authenticateToken, async (req, res) => {
         email: user.email,
         username: user.username,
         is_admin: user.is_admin,
+        profilePicture: user.profile_picture || null
       },
     });
   } catch (err) {

@@ -244,10 +244,10 @@ input:focus-visible {
   border-color: #d1d5db; /* Tailwind gray-300 */
 
 
-/* Pinterest-style Masonry Grid */
+/* Pinterest-style Masonry Grid - Updated to one-per-row */
 .masonry-grid {
-  column-count: auto;
-  column-width: 300px;
+  column-count: 1;
+  column-width: 100%;
   column-gap: 1.5rem;
 }
 
@@ -260,7 +260,7 @@ input:focus-visible {
 
 @media (min-width: 641px) and (max-width: 1024px) {
   .masonry-grid {
-    column-count: 2;
+    column-count: 1;
   }
 }
 

@@ -13,6 +13,7 @@ const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5050';
 // Helper to format time since post creation
 function formatTimeSince(dateString) {
     if (!dateString) return '';
+    // Backend now returns ISO 8601 with 'Z' UTC marker
     const date = new Date(dateString);
     const sec = Math.floor((Date.now() - date.getTime()) / 1000);
     if (sec < 60) return `${sec}s ago`;
@@ -133,10 +134,33 @@ export default function ViewPostPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Main Content - Left Side (2/3 width on desktop) */}
                         <div className="lg:col-span-2">
-                            <h1 className="text-3xl text-black font-bold mb-2">{post.title}</h1>
+                            <div className="flex items-start gap-4 mb-4">
+                                {/* Profile Picture */}
+                                <div className="flex-shrink-0">
+                                    {post.profile_picture ? (
+                                        <img 
+                                            src={`/${post.profile_picture}`} 
+                                            alt={`${post.username || 'User'}'s avatar`}
+                                            className="w-12 h-12 rounded-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-800 via-green-750 to-green-900 flex items-center justify-center text-white font-bold text-lg">
+                                            {(post.username || 'A').charAt(0).toUpperCase()}
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                {/* Title and Info */}
+                                <div className="flex-1">
+                                    <h1 className="text-3xl text-black font-bold mb-2">{post.title}</h1>
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-lg text-black">By {post.is_anonymous ? 'Anonymous' : (post.username || '')} | {formatTimeSince(post.created_at)}</span>
+                                        <h4 className={`card-title text-sm text-black px-2 rounded-full inline-block ${topicColors[post.topic] || topicColors.Other}`}>{post.topic}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div className="flex items-center gap-4 mb-4">
-                                <span className="text-lg text-black">By {post.is_anonymous ? 'Anonymous' : (post.username || '')} | {formatTimeSince(post.created_at)}</span>
-                                <h4 className={`card-title text-sm text-black px-2 rounded-full inline-block ${topicColors[post.topic] || topicColors.Other}`}>{post.topic}</h4>
                                 <div className="flex items-center gap-2 ml-auto">
                                                                 <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer">
                                                                         <motion.button

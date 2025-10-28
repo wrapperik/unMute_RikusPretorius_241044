@@ -14,6 +14,7 @@ const router = express.Router();
 // REGISTER a new account
 // Expects: { email, username?, password, is_admin? }
 // - Hashes the password
+// - Randomly assigns one of 5 profile pictures (pfp1.png - pfp5.png)
 // - Inserts a new row in Users table
 // - Returns 201 on success
 router.post("/register", async (req, res) => {
@@ -28,11 +29,14 @@ router.post("/register", async (req, res) => {
       return res.status(409).json({ status: "error", error: "Email already registered" });
     }
     const hashed = await bcrypt.hash(password, 10);
+    // Randomly assign one of 5 profile pictures (pfp1.png - pfp5.png)
+    const pfpNum = Math.floor(Math.random() * 5) + 1;
+    const profilePicture = `pfp${pfpNum}.png`;
     const [result] = await pool.query(
-      "INSERT INTO users (email, username, password, is_admin) VALUES (?, ?, ?, ?)",
-      [email, username || null, hashed, is_admin || 0]
+      "INSERT INTO users (email, username, password, is_admin, profile_picture) VALUES (?, ?, ?, ?, ?)",
+      [email, username || null, hashed, is_admin || 0, profilePicture]
     );
-    res.status(201).json({ status: "ok", message: "User registered", userId: result.insertId });
+    res.status(201).json({ status: "ok", message: "User registered", userId: result.insertId, profilePicture });
   } catch (err) {
     console.error(err);
     res.status(500).json({ status: "error", error: err.message });
@@ -75,6 +79,7 @@ router.post("/login", async (req, res) => {
         email: user.email,
         username: user.username,
         is_admin: user.is_admin,
+        profilePicture: user.profile_picture,
       }
     });
   } catch (err) {

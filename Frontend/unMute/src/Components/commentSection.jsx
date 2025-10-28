@@ -166,9 +166,17 @@ const CommentSection = ({ postId }) => {
                             {comments.map((comment) => (
                                 <div key={comment.comment_id} className={`rounded-2xl p-4 shadow-sm border ${comment.is_flagged && isAdmin ? 'bg-red-50 border-red-300' : 'bg-white border-gray-200'}`}>
                                     <div className="flex items-start gap-3">
-                                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-green-800 via-green-750 to-green-900 flex items-center justify-center text-white font-bold text-sm">
-                                            {(comment.username || 'A').charAt(0).toUpperCase()}
-                                        </div>
+                                        {comment.profile_picture ? (
+                                            <img 
+                                                src={`/${comment.profile_picture}`} 
+                                                alt={`${comment.username || 'User'}'s avatar`}
+                                                className="flex-shrink-0 w-10 h-10 rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-green-800 via-green-750 to-green-900 flex items-center justify-center text-white font-bold text-sm">
+                                                {(comment.username || 'A').charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center justify-between mb-1">
                                                 <span className="font-semibold text-sm text-gray-900">

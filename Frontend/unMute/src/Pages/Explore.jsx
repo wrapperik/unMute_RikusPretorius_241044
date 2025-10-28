@@ -68,6 +68,7 @@ export default function Explore() {
           const topic = (rawTopic && rawTopic !== 'NULL')
             ? rawTopic.trim().replace(/\s+/g, ' ')
             : 'Other';
+          // Backend now returns ISO 8601 with 'Z' UTC marker
           const createdAt = r.created_at ? new Date(r.created_at) : null;
 
       return {
@@ -78,6 +79,7 @@ export default function Explore() {
             time: formatTimeSince(createdAt),
             description: content,
             raw: r,
+            profile_picture: r.profile_picture || null,
             likes: { count: 0, liked_by_user: false },
           };
         });

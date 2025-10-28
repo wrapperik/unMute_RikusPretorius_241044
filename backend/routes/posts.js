@@ -34,13 +34,20 @@ function getUserIdFromReq(req) {
 router.get("/public", async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT p.post_id, p.user_id, p.content, p.title, p.topic, p.is_anonymous, p.is_flagged, p.flagged_at, p.created_at,
-              u.username
+      `SELECT p.post_id, p.user_id, p.content, p.title, p.topic, p.is_anonymous, p.is_flagged, p.flagged_at, 
+              DATE_FORMAT(CONVERT_TZ(p.created_at, @@session.time_zone, '+00:00'), '%Y-%m-%dT%H:%i:%SZ') as created_at,
+              u.username, u.profile_picture
        FROM PublicPosts p
        LEFT JOIN users u ON u.user_id = p.user_id
        ORDER BY p.created_at DESC
        LIMIT 100`
     );
+
+    // Debug: log the first row's created_at
+    if (rows.length > 0) {
+      console.log('First post created_at from DB:', rows[0].created_at);
+      console.log('Current server time:', new Date());
+    }
 
     const posts = rows.map(r => ({
   post_id: r.post_id,
@@ -53,6 +60,7 @@ router.get("/public", async (req, res) => {
       is_flagged: !!r.is_flagged,
       flagged_at: r.flagged_at,
       created_at: r.created_at,
+      profile_picture: r.profile_picture || null,
     }));
 
     res.json({ status: "ok", data: posts });
@@ -68,8 +76,9 @@ router.get('/:id', async (req, res) => {
   try {
     const postId = req.params.id;
     const [rows] = await pool.query(
-      `SELECT p.post_id, p.user_id, p.content, p.title, p.topic, p.is_anonymous, p.is_flagged, p.flagged_at, p.created_at,
-              u.username
+      `SELECT p.post_id, p.user_id, p.content, p.title, p.topic, p.is_anonymous, p.is_flagged, p.flagged_at, 
+              DATE_FORMAT(CONVERT_TZ(p.created_at, @@session.time_zone, '+00:00'), '%Y-%m-%dT%H:%i:%SZ') as created_at,
+              u.username, u.profile_picture
        FROM PublicPosts p
        LEFT JOIN users u ON u.user_id = p.user_id
        WHERE p.post_id = ?
@@ -91,6 +100,7 @@ router.get('/:id', async (req, res) => {
       is_flagged: !!r.is_flagged,
       flagged_at: r.flagged_at,
       created_at: r.created_at,
+      profile_picture: r.profile_picture || null,
     };
     res.json(post);
   } catch (err) {
@@ -101,18 +111,22 @@ router.get('/:id', async (req, res) => {
 
 
 // POST /posts - create a new post
-// NOTE: This is currently using a placeholder user_id = 1.
-// In a real app, you would read the user id from the JWT token.
+// Requires authentication. Uses the user ID from the JWT token.
 router.post('/', async (req, res) => {
   try {
     const { title, topic, content, is_anonymous } = req.body;
-    // TODO: Replace with actual user_id from auth/session
-    const user_id = 1;
+    
+    // Extract user ID from JWT token
+    const user_id = getUserIdFromReq(req);
+    if (!user_id) {
+      return res.status(401).json({ status: 'error', error: 'Authentication required' });
+    }
+    
     if (!title || !topic || !content) {
       return res.status(400).json({ status: 'error', error: 'Missing required fields' });
     }
     const [result] = await pool.query(
-      `INSERT INTO PublicPosts (user_id, title, topic, content, is_anonymous) VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO PublicPosts (user_id, title, topic, content, is_anonymous, created_at) VALUES (?, ?, ?, ?, ?, NOW())`,
       [user_id, title, topic, content, is_anonymous ? 1 : 0]
     );
     res.json({ status: 'ok', post_id: result.insertId });
@@ -239,7 +253,9 @@ router.get('/:id/comments', async (req, res) => {
     if (postRows.length === 0) return res.status(404).json({ status: 'error', error: 'Post not found' });
 
     const [rows] = await pool.query(
-      `SELECT c.comment_id, c.post_id, c.user_id, c.content, c.is_flagged, c.flagged_at, c.created_at, u.username
+      `SELECT c.comment_id, c.post_id, c.user_id, c.content, c.is_flagged, c.flagged_at, 
+              DATE_FORMAT(CONVERT_TZ(c.created_at, @@session.time_zone, '+00:00'), '%Y-%m-%dT%H:%i:%SZ') as created_at,
+              u.username, u.profile_picture
        FROM comments c
        LEFT JOIN users u ON u.user_id = c.user_id
        WHERE c.post_id = ?
@@ -271,7 +287,7 @@ router.post('/:id/comments', async (req, res) => {
       'INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)',
       [postId, userId || null, trimmed]
     );
-    const [rows] = await pool.query('SELECT comment_id, post_id, user_id, content, is_flagged, flagged_at, created_at FROM comments WHERE comment_id = ? LIMIT 1', [result.insertId]);
+    const [rows] = await pool.query('SELECT c.comment_id, c.post_id, c.user_id, c.content, c.is_flagged, c.flagged_at, c.created_at, u.username, u.profile_picture FROM comments c LEFT JOIN users u ON u.user_id = c.user_id WHERE c.comment_id = ? LIMIT 1', [result.insertId]);
     res.status(201).json({ status: 'ok', data: rows[0] });
   } catch (err) {
     console.error('POST /posts/:id/comments error:', err);
