@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Flag, X, XCircle, ExternalLink, AlertCircle } from 'lucide-react';
+import { Trash2, Flag, X, XCircle, ExternalLink, AlertCircle, Users, Shield, ShieldOff } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import PageHeader from '../Components/adminPageHeader.jsx';
 
@@ -39,6 +39,7 @@ export default function AdminDashboard() {
   const [flaggedPosts, setFlaggedPosts] = useState([]);
   const [flaggedComments, setFlaggedComments] = useState([]);
   const [resources, setResources] = useState([]);
+  const [users, setUsers] = useState([]);
   
   // UI states
   const [loading, setLoading] = useState(true);
@@ -88,13 +89,33 @@ export default function AdminDashboard() {
     }
   };
 
+  // Fetch users
+  const fetchUsers = async () => {
+    try {
+      console.log('Fetching users with token:', user.token ? 'present' : 'missing');
+      const res = await fetch(`${API_BASE}/admin/users`, {
+        headers: { 'Authorization': `Bearer ${user.token}` }
+      });
+      const data = await res.json();
+      console.log('Users response:', JSON.stringify(data, null, 2));
+      if (data.status === 'ok') {
+        setUsers(data.data || []);
+      } else {
+        console.error('Failed to fetch users - status not ok:', data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+    }
+  };
+
   // Initial load
   useEffect(() => {
     if (user && (user.is_admin || user.isAdmin)) {
       Promise.all([
         fetchFlaggedPosts(),
         fetchFlaggedComments(),
-        fetchResources()
+        fetchResources(),
+        fetchUsers()
       ]).finally(() => setLoading(false));
     }
   }, [user]);
@@ -209,6 +230,53 @@ export default function AdminDashboard() {
     }
   };
 
+  // Delete user
+  const handleDeleteUser = async (userId) => {
+    if (!confirm('Delete this user permanently? This will remove all their posts and data.')) return;
+    try {
+      setProcessingId(userId);
+      const res = await fetch(`${API_BASE}/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${user.token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'ok') {
+        setUsers(prev => prev.filter(u => u.user_id !== userId));
+      } else {
+        throw new Error(data.error || 'Failed to delete user');
+      }
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  // Toggle admin status
+  const handleToggleAdmin = async (userId, currentStatus) => {
+    const action = currentStatus ? 'revoke' : 'grant';
+    if (!confirm(`${action === 'grant' ? 'Grant' : 'Revoke'} admin privileges for this user?`)) return;
+    try {
+      setProcessingId(userId);
+      const res = await fetch(`${API_BASE}/admin/users/${userId}/toggle-admin`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${user.token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'ok') {
+        setUsers(prev => prev.map(u => 
+          u.user_id === userId ? { ...u, is_admin: data.is_admin } : u
+        ));
+      } else {
+        throw new Error(data.error || 'Failed to update admin status');
+      }
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   if (!user || !(user.is_admin || user.isAdmin)) {
     return null;
   }
@@ -227,7 +295,8 @@ export default function AdminDashboard() {
   const sidebarItems = [
     { id: 'flaggedPosts', label: 'Review Flagged Posts', count: flaggedPosts.length },
     { id: 'flaggedComments', label: 'Review Flagged Comments', count: flaggedComments.length },
-    { id: 'manageResources', label: 'Manage Resources', count: 0 }
+    { id: 'manageResources', label: 'Manage Resources', count: 0 },
+    { id: 'manageUsers', label: 'Manage Users', count: users.length }
   ];
 
   return (
@@ -496,6 +565,127 @@ export default function AdminDashboard() {
                       </motion.div>
                     ))}
                   </div>
+                </motion.div>
+              )}
+
+              {/* Manage Users Section */}
+              {activeSection === 'manageUsers' && (
+                <motion.div
+                  key="manageUsers"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">Manage Users</h2>
+                    <p className="text-gray-600 mt-1">
+                      {users.length} registered user{users.length !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+
+                  {users.length === 0 ? (
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+                      <Users className="mx-auto h-12 w-12 text-gray-400 mb-3" />
+                      <p className="text-gray-500">No users found</p>
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                User
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Email
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Role
+                              </th>
+                              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {users.map(usr => (
+                              <tr key={usr.user_id} className="hover:bg-gray-50">
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="flex items-center">
+                                    <div className="flex-shrink-0 h-10 w-10">
+                                      {usr.profile_picture ? (
+                                        <img
+                                          src={`/${usr.profile_picture}`}
+                                          alt={usr.username}
+                                          className="h-10 w-10 rounded-full"
+                                        />
+                                      ) : (
+                                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                                          <span className="text-white font-semibold text-sm">
+                                            {usr.username?.charAt(0).toUpperCase()}
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="ml-4">
+                                      <div className="text-sm font-medium text-gray-900">
+                                        {usr.username}
+                                      </div>
+                                      <div className="text-sm text-gray-500">
+                                        ID: {usr.user_id}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="text-sm text-gray-900">{usr.email}</div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                    usr.is_admin 
+                                      ? 'bg-purple-100 text-purple-800' 
+                                      : 'bg-gray-100 text-gray-800'
+                                  }`}>
+                                    {usr.is_admin ? 'Admin' : 'User'}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <button
+                                      onClick={() => handleToggleAdmin(usr.user_id, usr.is_admin)}
+                                      disabled={processingId === usr.user_id || usr.user_id === user.user_id}
+                                      className={`p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                                        usr.is_admin
+                                          ? 'text-orange-600 hover:bg-orange-50'
+                                          : 'text-green-600 hover:bg-green-50'
+                                      }`}
+                                      title={usr.is_admin ? 'Revoke admin' : 'Grant admin'}
+                                    >
+                                      {usr.is_admin ? (
+                                        <ShieldOff className="h-5 w-5" />
+                                      ) : (
+                                        <Shield className="h-5 w-5" />
+                                      )}
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteUser(usr.user_id)}
+                                      disabled={processingId === usr.user_id || usr.user_id === user.user_id}
+                                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                      title="Delete user"
+                                    >
+                                      <Trash2 className="h-5 w-5" />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>

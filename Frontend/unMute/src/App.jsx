@@ -33,27 +33,31 @@ function App() {
   }
   return (
     <Router>
-      <RouteChangeTracker />
-      <Navbar />
-      <PageLoader>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route path="/resources" element={<ResourcesPage />} />
-          <Route path="/addresource" element={<AddResourcePage />} />
-          <Route path="/addpost" element={<AddPostPage />} />
-          <Route path="/addentry" element={<AddEntryPage />} />
-          <Route path="/viewpost/:id" element={<ViewPostPage />} />
-          <Route path="/viewentry/:id" element={<ViewEntryPage />} />
-          <Route path="/journal" element={<JournalPage />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/account" element={<Account />} />
-        </Routes>
-      </PageLoader>
-      <Footer />
+      <div className="min-h-screen flex flex-col">
+        <RouteChangeTracker />
+        <Navbar />
+        <main className="flex-1">
+          <PageLoader>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/explore" element={<Explore />} />
+              <Route path="/resources" element={<ResourcesPage />} />
+              <Route path="/addresource" element={<AddResourcePage />} />
+              <Route path="/addpost" element={<AddPostPage />} />
+              <Route path="/addentry" element={<AddEntryPage />} />
+              <Route path="/viewpost/:id" element={<ViewPostPage />} />
+              <Route path="/viewentry/:id" element={<ViewEntryPage />} />
+              <Route path="/journal" element={<JournalPage />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/account" element={<Account />} />
+            </Routes>
+          </PageLoader>
+        </main>
+        <Footer />
+      </div>
     </Router>
   )
 }

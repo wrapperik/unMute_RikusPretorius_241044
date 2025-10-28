@@ -166,4 +166,75 @@ router.post('/comments/:id/unflag', requireAdmin, async (req, res) => {
   }
 });
 
+// GET /admin/users - list all users
+router.get('/users', requireAdmin, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT user_id, username, email, profile_picture, is_admin
+       FROM users
+       ORDER BY user_id DESC`
+    );
+
+    const users = rows.map(r => ({
+      user_id: r.user_id,
+      username: r.username,
+      email: r.email,
+      profile_picture: r.profile_picture,
+      is_admin: !!r.is_admin,
+    }));
+
+    res.json({ status: 'ok', data: users });
+  } catch (err) {
+    console.error('GET /admin/users error:', err);
+    res.status(500).json({ status: 'error', error: err.message });
+  }
+});
+
+// DELETE /admin/users/:id - delete a user (admin only)
+router.delete('/users/:id', requireAdmin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    
+    // Prevent self-deletion
+    if (req.adminPayload.user_id === parseInt(userId)) {
+      return res.status(400).json({ status: 'error', error: 'Cannot delete your own account' });
+    }
+
+    const [rows] = await pool.query('SELECT user_id FROM users WHERE user_id = ? LIMIT 1', [userId]);
+    if (rows.length === 0) {
+      return res.status(404).json({ status: 'error', error: 'User not found' });
+    }
+
+    await pool.query('DELETE FROM users WHERE user_id = ?', [userId]);
+    res.json({ status: 'ok', message: 'User deleted successfully' });
+  } catch (err) {
+    console.error('DELETE /admin/users/:id error:', err);
+    res.status(500).json({ status: 'error', error: err.message });
+  }
+});
+
+// POST /admin/users/:id/toggle-admin - toggle admin status (admin only)
+router.post('/users/:id/toggle-admin', requireAdmin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    
+    const [rows] = await pool.query('SELECT user_id, is_admin FROM users WHERE user_id = ? LIMIT 1', [userId]);
+    if (rows.length === 0) {
+      return res.status(404).json({ status: 'error', error: 'User not found' });
+    }
+
+    const newAdminStatus = rows[0].is_admin ? 0 : 1;
+    await pool.query('UPDATE users SET is_admin = ? WHERE user_id = ?', [newAdminStatus, userId]);
+    
+    res.json({ 
+      status: 'ok', 
+      message: `User ${newAdminStatus ? 'granted' : 'revoked'} admin status`,
+      is_admin: !!newAdminStatus
+    });
+  } catch (err) {
+    console.error('POST /admin/users/:id/toggle-admin error:', err);
+    res.status(500).json({ status: 'error', error: err.message });
+  }
+});
+
 export default router; // mounted under /admin in server.js
