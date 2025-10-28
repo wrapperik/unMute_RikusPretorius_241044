@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import Home from './Pages/Home.jsx'
 import Signup from './Pages/Signup.jsx'
 import Login from './Pages/Login.jsx'
@@ -18,8 +19,20 @@ import Footer from './Components/footer.jsx'
 import './index.css';
 
 function App() {
+  // Component to track route changes and send page_view events to gtag
+  function RouteChangeTracker() {
+    const location = useLocation()
+    useEffect(() => {
+      // lazy import to avoid issues during SSR or if window.gtag isn't present yet
+      import('./analytics/gtag').then(({ pageview }) => {
+        pageview(location.pathname + location.search)
+      }).catch(() => {})
+    }, [location])
+    return null
+  }
   return (
     <Router>
+      <RouteChangeTracker />
       <Navbar />
       <PageLoader>
         <Routes>
