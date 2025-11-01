@@ -1,0 +1,18 @@
+# Ignore everything by default
+*
+
+# Include only backend files needed for deployment
+!server.js
+!package.json
+!package-lock.json
+!db.js
+!test-db.js
+!routes/
+!routes/**
+
+# Ignore node_modules (Railway installs from package.json)
+node_modules/
+
+# Ignore environment and system files
+.env
+.DS_Store
