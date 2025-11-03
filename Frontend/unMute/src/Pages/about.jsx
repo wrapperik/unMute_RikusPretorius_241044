@@ -74,7 +74,7 @@ export default function About() {
 
           {/* Mission Statement */}
           <motion.div
-            className="bg-black text-white rounded-3xl p-12 md:p-16 mb-16"
+            className="bg-[#004643] text-white rounded-3xl p-12 md:p-16 mb-16"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -117,7 +117,7 @@ export default function About() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
-                <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-[#004643] rounded-xl flex items-center justify-center mb-4">
                   <value.icon className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-black mb-3">{value.title}</h3>
@@ -146,7 +146,7 @@ export default function About() {
               </p>
               <Link 
                 to="/explore"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-full font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#004643] text-white rounded-full font-medium hover:bg-white hover:text-[#004643] border-2 border-[#004643] transition-all duration-300"
               >
                 Explore Posts
                 <motion.span
@@ -195,7 +195,7 @@ export default function About() {
               </p>
               <Link 
                 to="/journal"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black rounded-full font-medium hover:bg-black hover:text-white border-2 border-black transition-all duration-300"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#004643] rounded-full font-medium hover:bg-[#004643] hover:text-white border-2 border-[#004643] transition-all duration-300"
               >
                 Start Journaling
                 <motion.span
@@ -211,7 +211,7 @@ export default function About() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 px-6 bg-black text-white">
+      <section className="py-20 px-6 bg-[#004643] text-white">
         <div className="max-w-7xl mx-auto">
           <motion.div
             className="text-center mb-12"
@@ -259,13 +259,13 @@ export default function About() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/signup"
-              className="px-8 py-4 bg-black text-white rounded-full font-medium hover:bg-white hover:text-black border-2 border-black transition-all duration-300"
+              className="px-8 py-4 bg-[#004643] text-white rounded-full font-medium hover:bg-white hover:text-[#004643] border-2 border-[#004643] transition-all duration-300"
             >
               Join unMute
             </Link>
             <Link
               to="/explore"
-              className="px-8 py-4 bg-white text-black rounded-full font-medium hover:bg-black hover:text-white border-2 border-black transition-all duration-300"
+              className="px-8 py-4 bg-white text-[#004643] rounded-full font-medium hover:bg-[#004643] hover:text-white border-2 border-[#004643] transition-all duration-300"
             >
               Explore Community
             </Link>

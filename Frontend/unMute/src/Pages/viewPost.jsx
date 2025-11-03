@@ -45,6 +45,7 @@ export default function ViewPostPage() {
     const [error, setError] = useState(null);
     const { user } = useContext(AuthContext);
     const [likes, setLikes] = useState({ count: 0, liked_by_user: false });
+    const [isFlagged, setIsFlagged] = useState(false);
     const isAdmin = user && (user.is_admin || user.isAdmin);
 
     useEffect(() => {
@@ -52,6 +53,7 @@ export default function ViewPostPage() {
             .then(res => res.json())
             .then(data => {
                 setPost(data);
+                setIsFlagged(data.is_flagged || false);
                 setLoading(false);
             })
             .catch(err => {
@@ -127,46 +129,49 @@ export default function ViewPostPage() {
     return (
         <>
             <ViewPostPageHeader />
-            <div className="container mx-auto p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8">
+            <div className="container mx-auto p-4 md:p-6 max-w-7xl px-4 sm:px-6 lg:px-12 py-6 md:py-8">
                 {loading && <p>Loading post...</p>}
                 {error && <p className="text-red-600">{error}</p>}
                 {post && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
                         {/* Main Content - Left Side (2/3 width on desktop) */}
                         <div className="lg:col-span-2">
-                            <div className="flex items-start gap-4 mb-4">
+                            <div className="flex items-start gap-3 md:gap-4 mb-4">
                                 {/* Profile Picture */}
                                 <div className="flex-shrink-0">
                                     {post.profile_picture ? (
                                         <img 
                                             src={`/${post.profile_picture}`} 
                                             alt={`${post.username || 'User'}'s avatar`}
-                                            className="w-12 h-12 rounded-full object-cover"
+                                            className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover"
                                         />
                                     ) : (
-                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-800 via-green-750 to-green-900 flex items-center justify-center text-white font-bold text-lg">
+                                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-green-800 via-green-750 to-green-900 flex items-center justify-center text-white font-bold text-base md:text-lg">
                                             {(post.username || 'A').charAt(0).toUpperCase()}
                                         </div>
                                     )}
                                 </div>
                                 
                                 {/* Title and Info */}
-                                <div className="flex-1">
-                                    <h1 className="text-3xl text-black font-bold mb-2">{post.title}</h1>
-                                    <div className="flex items-center gap-4">
-                                        <span className="text-lg text-black">By {post.is_anonymous ? 'Anonymous' : (post.username || '')} | {formatTimeSince(post.created_at)}</span>
-                                        <h4 className={`card-title text-sm text-black px-2 rounded-full inline-block ${topicColors[post.topic] || topicColors.Other}`}>{post.topic}</h4>
+                                <div className="flex-1 min-w-0">
+                                    <h1 className="text-xl md:text-3xl text-black font-bold mb-2 break-words">{post.title}</h1>
+                                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                                        <span className="text-sm md:text-lg text-black">By {post.is_anonymous ? 'Anonymous' : (post.username || '')} | {formatTimeSince(post.created_at)}</span>
+                                        <h4 className={`card-title text-xs md:text-sm text-black px-2 py-1 rounded-full inline-block w-fit ${topicColors[post.topic] || topicColors.Other}`}>{post.topic}</h4>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="flex items-center gap-2 ml-auto">
-                                                                <div className="rounded-full h-11 w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer">
+                            <div className="flex items-center gap-3 md:gap-4 mb-4 justify-end">
+                                <div className="flex items-center gap-2 md:gap-4">
+                                                                <div className="rounded-full h-9 w-9 md:h-11 md:w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer">
                                                                         <motion.button
                                                                             aria-label={likes.liked_by_user ? 'Unlike' : 'Like'}
                                                                             onClick={() => {
-                                                                                if (!user || !user.token) return; // optionally redirect to login
+                                                                                if (!user || !user.token) {
+                                                                                    navigate('/login');
+                                                                                    return;
+                                                                                }
                                                                                 const prev = { ...likes };
                                                                                 const newLiked = !likes.liked_by_user;
                                                                                 setLikes({ count: newLiked ? likes.count + 1 : Math.max(0, likes.count - 1), liked_by_user: newLiked });
@@ -189,12 +194,16 @@ export default function ViewPostPage() {
                                                                             transition={{ type: 'spring', stiffness: 500, damping: 20 }}
                                                                             whileTap={{ scale: 0.95 }}
                                                                         >
-                                                                                                                                                            <Heart size={20} className={likes.liked_by_user ? 'liked-heart' : ''} />
+                                                                                                                                                            <Heart size={18} className={`md:w-5 md:h-5 ${likes.liked_by_user ? 'liked-heart' : ''}`} />
                                                                         </motion.button>
                                                                 </div>
                                 <div 
                                     onClick={() => {
-                                        if (!user || !user.token) { alert('Please login to flag posts'); return; }
+                                        if (!user || !user.token) { 
+                                            navigate('/login'); 
+                                            return; 
+                                        }
+                                        if (isFlagged) { alert('Post already flagged'); return; }
                                         if (!confirm('Flag this post for review?')) return;
                                         fetch(`${API_BASE}/posts/${id}/flag`, {
                                             method: 'POST',
@@ -204,16 +213,17 @@ export default function ViewPostPage() {
                                             .then(json => {
                                                 if (json.status === 'ok') {
                                                     alert('Post flagged for review');
+                                                    setIsFlagged(true);
                                                 } else {
                                                     alert(json.error || 'Failed to flag post');
                                                 }
                                             })
                                             .catch(() => alert('Network error'));
                                     }}
-                                    className="rounded-full h-11 w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer"
+                                    className="rounded-full h-9 w-9 md:h-11 md:w-11 bg-white text-black items-center justify-center border border-0.5 border-gray-200 flex transform transition duration-200 ease-in-out hover:scale-[1.10] hover:shadow-md cursor-pointer"
                                     aria-label="Flag post"
                                 >
-                                    <Flag size={20} />
+                                    <Flag size={18} className={`md:w-5 md:h-5 ${isFlagged ? 'fill-red-600 text-red-600' : ''}`} fill={isFlagged ? 'currentColor' : 'none'} />
                                 </div>
                             </div>
                             </div>
@@ -221,30 +231,30 @@ export default function ViewPostPage() {
 
                             {/* Admin Controls */}
                             {isAdmin && (
-                            <div className="mb-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <AlertTriangle className="h-5 w-5 text-blue-600" />
-                                    <h3 className="font-semibold text-blue-900">Admin Controls</h3>
+                            <div className="mb-6 p-3 md:p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                                    <AlertTriangle className="h-4 w-4 md:h-5 md:w-5 text-blue-600 flex-shrink-0" />
+                                    <h3 className="font-semibold text-sm md:text-base text-blue-900">Admin Controls</h3>
                                     {post.is_flagged && (
-                                        <span className="ml-auto px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                                        <span className="ml-auto px-2 md:px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
                                             Flagged
                                         </span>
                                     )}
                                 </div>
-                                <div className="flex gap-3">
+                                <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
                                     <button
                                         onClick={handleDeletePost}
-                                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 text-sm font-medium"
+                                        className="px-3 md:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2 text-xs md:text-sm font-medium"
                                     >
-                                        <Trash2 className="h-4 w-4" />
+                                        <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
                                         Delete Post
                                     </button>
                                     {post.is_flagged && (
                                         <button
                                             onClick={handleDismissFlag}
-                                            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2 text-sm font-medium"
+                                            className="px-3 md:px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center gap-2 text-xs md:text-sm font-medium"
                                         >
-                                            <XCircle className="h-4 w-4" />
+                                            <XCircle className="h-3 w-3 md:h-4 md:w-4" />
                                             Dismiss Flag
                                         </button>
                                     )}
@@ -252,7 +262,7 @@ export default function ViewPostPage() {
                             </div>
                         )}
 
-                            <div className="text-lg text-black leading-relaxed max-w-prose">
+                            <div className="text-sm md:text-lg text-black leading-relaxed max-w-prose break-words">
                                 {post.content.split('\n').map((line, idx) => (
                                     <React.Fragment key={idx}>
                                         {line}
