@@ -6,7 +6,16 @@
 // - Start the HTTP server
 
 import dotenv from "dotenv";
-dotenv.config(); // load .env
+import path from "path";
+import { fileURLToPath } from 'url';
+
+// Get current directory in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load .env from backend directory
+dotenv.config({ path: path.join(__dirname, '.env') });
+
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.js";
@@ -17,7 +26,6 @@ import moodCheckinsRoutes from "./routes/moodcheckins.js";
 import adminRoutes from "./routes/admin.js";
 import userRoutes from "./routes/user.js";
 import { testConnection } from "./db.js";
-import path from "path";
 
 
 const app = express();
