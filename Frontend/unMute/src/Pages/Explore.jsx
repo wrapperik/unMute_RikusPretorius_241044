@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import PageHeader from '../Components/explorePageHeader.jsx'
 import PostCard from '../Components/PostCard.jsx'
 import { AuthContext } from '../context/AuthContext.jsx'
+import SEO from '../Components/SEO.jsx'
 
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5050';
@@ -144,6 +145,11 @@ export default function Explore() {
 
   return (
     <>
+      <SEO 
+        title="Explore Stories & Community"
+        description="Read and share anonymous stories about mental health. Join our supportive community of men discussing anxiety, depression, motivation, and more in a judgment-free space."
+        keywords="mental health stories, anonymous posts, men's support community, anxiety support, depression help, mental wellness discussions"
+      />
       <PageHeader />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-col lg:flex-row gap-8">
         {/* Filtering System */}

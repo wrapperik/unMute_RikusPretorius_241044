@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Users, BookOpen, Shield, Target, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import SEO from '../Components/SEO';
 
 export default function About() {
   const values = [
@@ -35,6 +36,12 @@ export default function About() {
   ];
 
   return (
+    <>
+      <SEO 
+        title="About Us - Our Mission"
+        description="Learn about unMute's mission to break the silence on men's mental health. We're building a safe, judgment-free platform for men to share stories, connect, and heal."
+        keywords="about unMute, men's mental health mission, mental health community, safe space for men, anonymous support platform"
+      />
     <div className="min-h-screen w-full">
       {/* Hero Section */}
       <section className="py-20 px-6">
@@ -266,5 +273,6 @@ export default function About() {
         </motion.div>
       </section>
     </div>
+    </>
   );
 }

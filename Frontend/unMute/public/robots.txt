@@ -1,0 +1,15 @@
+# robots.txt for unMute
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Disallow admin and private pages
+Disallow: /admin
+Disallow: /account
+Disallow: /addpost
+Disallow: /addentry
+Disallow: /addresource
+
+# Sitemap location
+Sitemap: https://www.unmute.digital/sitemap.xml

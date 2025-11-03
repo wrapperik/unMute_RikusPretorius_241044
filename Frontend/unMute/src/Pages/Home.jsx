@@ -3,9 +3,16 @@ import React from 'react'
 import Features from '../Components/features'
 import HomeAbout from '../Components/homeAbout'
 import CloudLayer from '../Components/CloudLayer'
+import SEO from '../Components/SEO'
 
 export default function Home() {
   return (
+  <>
+    <SEO 
+      title="unMute - Breaking the Silence on Men's Mental Health"
+      description="A safe, judgment-free platform where men can share their stories, connect anonymously, journal their experiences, and access mental health resources. Join our supportive community."
+      keywords="men's mental health, anonymous support, mental wellness, men's therapy, emotional support, depression support, anxiety help, mental health journaling, men's community, safe space"
+    />
   <div className="min-h-screen w-full flex flex-col">
     {/* Centered page container to keep consistent widths */}
     <div className="w-full max-w-8xl mx-auto px-6 md:px-8 flex flex-col">
@@ -40,5 +47,6 @@ export default function Home() {
       </div>
     </div>
     </div>
+  </>
   )
 }
