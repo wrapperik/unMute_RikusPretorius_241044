@@ -33,6 +33,12 @@ function getUserIdFromReq(req) {
 // No auth needed. Joins with Users for username (if not anonymous).
 router.get("/public", async (req, res) => {
   try {
+    // Advanced SQL Query with JOIN:
+    // - LEFT JOIN ensures we get posts even if user is deleted (user_id may be NULL)
+    // - Combines data from PublicPosts (p) and users (u) tables
+    // - Returns username and profile_picture from users table alongside post data
+    // - DATE_FORMAT converts timestamp to ISO 8601 format for consistent frontend parsing
+    // - CONVERT_TZ converts server timezone to UTC (+00:00)
     const [rows] = await pool.query(
       `SELECT p.post_id, p.user_id, p.content, p.title, p.topic, p.is_anonymous, p.is_flagged, p.flagged_at, 
               DATE_FORMAT(CONVERT_TZ(p.created_at, @@session.time_zone, '+00:00'), '%Y-%m-%dT%H:%i:%SZ') as created_at,
