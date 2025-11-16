@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![unMute Logo](Frontend/unMute/public/unmute.png)
+![unMute Logo](Frontend/unMute/public/hero-mountain.png)
 
 A safe, judgment-free platform where men can share their stories, connect anonymously, journal their experiences, and access mental health resources.
 
