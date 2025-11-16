@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![unMute Logo](Frontend/unMute/public/hero-mountain.png)
+![unMute Banner](Frontend/unMute/public/unmute-banner-readme.png)
 
 A safe, judgment-free platform where men can share their stories, connect anonymously, journal their experiences, and access mental health resources.
 
@@ -797,6 +797,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Cloudinary for image CDN services
 - Railway for database hosting
 - Tsungai Katsuro (My amazing lecturer)
+
+---
+
+## 📱 Mockups
+
+<div align="center">
+
+![unMute Mockups](Frontend/unMute/public/Mockups.png)
+
+</div>
 
 ---
 <div align="center">
